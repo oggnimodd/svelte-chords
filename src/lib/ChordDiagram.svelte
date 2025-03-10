@@ -132,7 +132,6 @@
           type={m.type}
           stringIndex={m.string}
           orientation="horizontal"
-          {nutWidth}
           stringSpacing={stringSpacing()}
           {stringCount}
         />
@@ -181,7 +180,6 @@
           type={m.type}
           stringIndex={m.string}
           orientation="vertical"
-          {nutWidth}
           stringSpacing={stringSpacing()}
           {stringCount}
         />
