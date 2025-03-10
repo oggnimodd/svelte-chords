@@ -29,7 +29,7 @@
   // Calculate fret spacing based on our coordinate system.
   const fretSpacing = $derived(() => {
     if (orientation === "horizontal") {
-      return (coordWidth - (showNut() ? nutWidth : 0)) / fretCount;
+      return coordWidth / fretCount;
     } else {
       return boxAspectRatio * (coordWidth / (stringCount - 1));
     }
@@ -92,6 +92,29 @@
 
   // Render the nut only if the chord starts at fret 1.
   const showNut = $derived(() => offset() === 0);
+
+  const marker = $derived(() => {
+    let marker: {
+      type: "x" | "o";
+      string: number;
+    }[] = [];
+
+    frets().forEach((fret, k) => {
+      if (fret === 0) {
+        marker.push({
+          type: "o",
+          string: k,
+        });
+      } else if (fret === "x") {
+        marker.push({
+          type: "x",
+          string: k,
+        });
+      }
+    });
+
+    return marker;
+  });
 </script>
 
 <div style="width: 100%; aspect-ratio: {width()}/{height()}">
@@ -111,7 +134,7 @@
           parentWidth={width()}
         />
       {/if}
-      <g transform={`translate(${nutWidth}, 0)`}>
+      <g transform={`translate(${showNut() ? nutWidth : 0}, 0)`}>
         <Neck
           {stringCount}
           {fretCount}
