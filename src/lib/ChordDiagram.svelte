@@ -136,7 +136,7 @@
           {stringCount}
         />
       {/each}
-      <g transform={`translate(${instrument === "guitar" ? 6 : 8}, 0)`}>
+      <g transform={`translate(${instrument === "guitar" ? 7 : 8}, 0)`}>
         {#if showNut()}
           <!-- Nut on the left -->
           <Nut
