@@ -68,7 +68,6 @@
 
   // Compute offset: if barres exist use that; otherwise, use lowest fretted note.
   const offset = $derived(() => {
-    // figure out the minimum *non-open* fret
     let minFret = Infinity;
     let hasOpenString = false;
 
@@ -82,15 +81,12 @@
       }
     }
 
-    // If there's an open string, offset can't be > 0
     if (hasOpenString) {
       return 0;
     }
-    // If everything was muted or something weird, fallback
     if (minFret === Infinity) {
       return 0;
     }
-    // Otherwise, shift the diagram so the chord’s lowest fret is at position 1
     return minFret > 1 ? minFret - 1 : 0;
   });
 
@@ -115,7 +111,7 @@
           parentWidth={width()}
         />
       {/if}
-      <g transform={`translate(${showNut() ? nutWidth : 0}, 0)`}>
+      <g transform={`translate(${nutWidth}, 0)`}>
         <Neck
           {stringCount}
           {fretCount}
@@ -126,7 +122,7 @@
           {stringColor}
           {fretColor}
           {orientation}
-          skipFirstFretLine={showNut()}
+          skipFirstFretLine={false}
         />
         {#each frets().slice().reverse() as fret, k}
           {#if typeof fret === "number" && fret > 0}
@@ -151,7 +147,7 @@
           parentWidth={width()}
         />
       {/if}
-      <g transform={`translate(0, ${showNut() ? nutWidth : 0})`}>
+      <g transform={`translate(0, ${nutWidth})`}>
         <Neck
           {stringCount}
           {fretCount}
@@ -162,7 +158,7 @@
           {stringColor}
           {fretColor}
           {orientation}
-          skipFirstFretLine={showNut()}
+          skipFirstFretLine={false}
         />
         {#each frets() as fret, k}
           {#if typeof fret === "number" && fret > 0}
