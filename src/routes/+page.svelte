@@ -49,14 +49,14 @@
   ];
 </script>
 
-<div class="mx-auto max-w-4xl px-4 py-20">
+<div class="mx-auto flex max-w-4xl flex-col gap-y-16 px-4 py-20">
   <div class="mt-4 grid grid-cols-4 gap-10">
     {#each chordsGuitar as chord}
       <ChordDiagram
         {chord}
         instrument="guitar"
         orientation="vertical"
-        nutWidth={6}
+        nutWidth={4}
         nutColor="black"
         dotRadius={7}
         dotColor="black"
@@ -82,7 +82,7 @@
         {chord}
         instrument="guitar"
         orientation="horizontal"
-        nutWidth={6}
+        nutWidth={4}
         nutColor="black"
         dotRadius={7}
         dotColor="black"
@@ -108,7 +108,7 @@
         {chord}
         instrument="ukulele"
         orientation="vertical"
-        nutWidth={6}
+        nutWidth={4}
         nutColor="black"
         dotRadius={7}
         dotColor="black"
@@ -135,7 +135,7 @@
         {chord}
         instrument="ukulele"
         orientation="horizontal"
-        nutWidth={6}
+        nutWidth={4}
         nutColor="black"
         dotRadius={7}
         dotColor="black"

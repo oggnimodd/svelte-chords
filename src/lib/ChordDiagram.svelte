@@ -2,6 +2,7 @@
   import Nut from "./Nut.svelte";
   import Neck from "./Neck.svelte";
   import Dot from "./Dot.svelte";
+  import StringMarker from "./StringMarker.svelte";
   import type { ChordDiagramProps } from "./types.js";
 
   // Get props as before.
@@ -93,6 +94,7 @@
   // Render the nut only if the chord starts at fret 1.
   const showNut = $derived(() => offset() === 0);
 
+  // Marker for open ("o") and muted ("x") strings.
   const marker = $derived(() => {
     let marker: {
       type: "x" | "o";
@@ -124,76 +126,102 @@
     overflow="visible"
   >
     {#if orientation === "horizontal"}
-      {#if showNut()}
-        <!-- Nut on the left -->
-        <Nut
-          width={nutWidth}
-          height={height()}
-          color={nutColor}
+      <!-- Render markers for horizontal orientation -->
+      {#each marker() as m}
+        <StringMarker
+          type={m.type}
+          stringIndex={m.string}
           orientation="horizontal"
-          parentWidth={width()}
-        />
-      {/if}
-      <g transform={`translate(${showNut() ? nutWidth : 0}, 0)`}>
-        <Neck
-          {stringCount}
-          {fretCount}
+          {nutWidth}
           stringSpacing={stringSpacing()}
-          fretSpacing={fretSpacing()}
-          {stringWidth}
-          {fretWidth}
-          {stringColor}
-          {fretColor}
-          {orientation}
-          skipFirstFretLine={false}
+          {stringCount}
         />
-        {#each frets().slice().reverse() as fret, k}
-          {#if typeof fret === "number" && fret > 0}
-            <Dot
-              x={((fret as number) - offset() - 0.5) * fretSpacing()}
-              y={k * stringSpacing()}
-              radius={dotRadius}
-              color={dotColor}
-              showFingerNumber={false}
-            />
-          {/if}
-        {/each}
+      {/each}
+      <g transform={`translate(${instrument === "guitar" ? 6 : 8}, 0)`}>
+        {#if showNut()}
+          <!-- Nut on the left -->
+          <Nut
+            width={nutWidth}
+            height={height()}
+            color={nutColor}
+            orientation="horizontal"
+            parentWidth={width()}
+          />
+        {/if}
+        <g transform={`translate(${showNut() ? nutWidth : 0}, 0)`}>
+          <Neck
+            {stringCount}
+            {fretCount}
+            stringSpacing={stringSpacing()}
+            fretSpacing={fretSpacing()}
+            {stringWidth}
+            {fretWidth}
+            {stringColor}
+            {fretColor}
+            {orientation}
+            skipFirstFretLine={false}
+          />
+          {#each frets().slice().reverse() as fret, k}
+            {#if typeof fret === "number" && fret > 0}
+              <Dot
+                x={((fret as number) - offset() - 0.5) * fretSpacing()}
+                y={k * stringSpacing()}
+                radius={dotRadius}
+                color={dotColor}
+                showFingerNumber={false}
+              />
+            {/if}
+          {/each}
+        </g>
       </g>
     {:else}
-      {#if showNut()}
-        <!-- Nut on top -->
-        <Nut
-          width={width()}
-          height={nutWidth}
-          color={nutColor}
+      <!-- Render markers for vertical orientation -->
+      {#each marker() as m}
+        <StringMarker
+          type={m.type}
+          stringIndex={m.string}
           orientation="vertical"
-          parentWidth={width()}
-        />
-      {/if}
-      <g transform={`translate(0, ${nutWidth})`}>
-        <Neck
-          {stringCount}
-          {fretCount}
+          {nutWidth}
           stringSpacing={stringSpacing()}
-          fretSpacing={fretSpacing()}
-          {stringWidth}
-          {fretWidth}
-          {stringColor}
-          {fretColor}
-          {orientation}
-          skipFirstFretLine={false}
+          {stringCount}
         />
-        {#each frets() as fret, k}
-          {#if typeof fret === "number" && fret > 0}
-            <Dot
-              x={k * stringSpacing()}
-              y={((fret as number) - offset() - 0.5) * fretSpacing()}
-              radius={dotRadius}
-              color={dotColor}
-              showFingerNumber={false}
-            />
-          {/if}
-        {/each}
+      {/each}
+      <g transform={`translate(0, ${instrument === "guitar" ? 6 : 8})`}>
+        {#if showNut()}
+          <!-- Nut on top -->
+          <Nut
+            width={width()}
+            height={nutWidth}
+            color={nutColor}
+            orientation="vertical"
+            parentWidth={width()}
+          />
+        {/if}
+        <g transform={`translate(0, ${nutWidth})`}>
+          <Neck
+            {stringCount}
+            {fretCount}
+            stringSpacing={stringSpacing()}
+            fretSpacing={fretSpacing()}
+            {stringWidth}
+            {fretWidth}
+            {stringColor}
+            {fretColor}
+            {orientation}
+            skipFirstFretLine={false}
+          />
+          {#each frets() as fret, k}
+            {#if typeof fret === "number" && fret > 0}
+              <Dot
+                x={k * stringSpacing()}
+                y={((fret as number) - offset() - 0.5) * fretSpacing()}
+                radius={dotRadius}
+                color={dotColor}
+                showFingerNumber={false}
+              />
+            {/if}
+          {/each}
+        </g>
       </g>
     {/if}
   </svg>
