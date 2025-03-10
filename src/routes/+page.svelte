@@ -50,7 +50,7 @@
 </script>
 
 <div class="mx-auto flex max-w-4xl flex-col gap-y-16 px-4 py-20">
-  <div class="mt-4 grid grid-cols-4 gap-10">
+  <div class="mt-4 grid grid-cols-2 gap-10 sm:grid-cols-4">
     {#each chordsGuitar as chord}
       <ChordDiagram
         {chord}
@@ -76,7 +76,7 @@
   </div>
 
   <!-- Guitar horizontal chords -->
-  <div class="mt-4 grid grid-cols-4 gap-10">
+  <div class="mt-4 grid grid-cols-2 gap-10 sm:grid-cols-4">
     {#each chordsGuitar as chord}
       <ChordDiagram
         {chord}
@@ -102,7 +102,7 @@
   </div>
 
   <!-- Ukulele -->
-  <div class="mt-4 grid grid-cols-4 gap-10">
+  <div class="mt-4 grid grid-cols-2 gap-10 sm:grid-cols-4">
     {#each chordsUkulele as chord}
       <ChordDiagram
         {chord}
@@ -129,7 +129,7 @@
   </div>
 
   <!-- Ukulele vertical -->
-  <div class="mt-4 grid grid-cols-4 gap-10">
+  <div class="mt-4 grid grid-cols-2 gap-10 sm:grid-cols-4">
     {#each chordsUkulele as chord}
       <ChordDiagram
         {chord}
