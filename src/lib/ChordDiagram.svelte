@@ -124,7 +124,7 @@
           {orientation}
           skipFirstFretLine={showNut()}
         />
-        {#each frets() as fret, k}
+        {#each frets().slice().reverse() as fret, k}
           {#if typeof fret === "number" && fret > 0}
             <Dot
               x={((fret as number) - offset() - 0.5) * fretSpacing()}
