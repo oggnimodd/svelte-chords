@@ -1,7 +1,7 @@
 <script lang="ts">
   import type { NutProps } from "./types.js";
 
-  let { width, height, color, orientation, parentWidth } = $props();
+  let { width, height, color, orientation, parentWidth }: NutProps = $props();
 
   // Calculate extra length: 4% of parentWidth
   const extra = $derived(() => 0.04 * parentWidth);

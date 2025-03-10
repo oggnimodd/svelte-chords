@@ -18,6 +18,8 @@ export type NutProps = {
   width: number;
   height: number;
   color: string;
+  parentWidth: number;
+  orientation: Orientation;
 };
 
 export type DotProps = {
@@ -30,10 +32,11 @@ export type DotProps = {
 };
 
 export type StringMarkerProps = {
-  x: number;
-  y: number;
-  marker: string;
-  size: number;
+  type: "o" | "x";
+  stringIndex: number;
+  orientation: Orientation;
+  stringSpacing: number;
+  stringCount: number;
 };
 
 export type BarreProps = {

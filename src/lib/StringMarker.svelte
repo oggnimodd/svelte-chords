@@ -1,5 +1,13 @@
 <script lang="ts">
-  let { type, stringIndex, orientation, stringSpacing, stringCount } = $props();
+  import type { StringMarkerProps } from "./types.js";
+
+  let {
+    type,
+    stringIndex,
+    orientation,
+    stringSpacing,
+    stringCount,
+  }: StringMarkerProps = $props();
   const markerSize = stringSpacing / 6;
 </script>
 
