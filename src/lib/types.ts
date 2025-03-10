@@ -56,6 +56,7 @@ export type NeckProps = {
   stringColor: string;
   fretColor: string;
   orientation: Orientation;
+  skipFirstFretLine?: boolean;
 };
 
 export type ChordDiagramProps = {

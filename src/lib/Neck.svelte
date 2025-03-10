@@ -1,6 +1,5 @@
 <script lang="ts">
   import type { NeckProps } from "./types.js";
-
   let {
     stringCount,
     fretCount,
@@ -11,15 +10,16 @@
     stringColor,
     fretColor,
     orientation,
+    skipFirstFretLine = false,
   }: NeckProps = $props();
 
   // Derived dimensions
-  let neckWidth = $derived(
+  let neckWidth = $derived.by(() =>
     orientation === "horizontal"
       ? fretCount * fretSpacing
       : (stringCount - 1) * stringSpacing
   );
-  let neckHeight = $derived(
+  let neckHeight = $derived.by(() =>
     orientation === "horizontal"
       ? (stringCount - 1) * stringSpacing
       : fretCount * fretSpacing
@@ -30,14 +30,16 @@
   {#if orientation === "horizontal"}
     <!-- Vertical fret lines -->
     {#each Array(fretCount + 1) as _, i}
-      <line
-        x1={i * fretSpacing}
-        y1="0"
-        x2={i * fretSpacing}
-        y2={neckHeight}
-        stroke={fretColor}
-        stroke-width={fretWidth}
-      />
+      {#if !(skipFirstFretLine && i === 0)}
+        <line
+          x1={i * fretSpacing}
+          y1="0"
+          x2={i * fretSpacing}
+          y2={neckHeight}
+          stroke={fretColor}
+          stroke-width={fretWidth}
+        />
+      {/if}
     {/each}
     <!-- Horizontal string lines -->
     {#each Array(stringCount) as _, j}
@@ -53,14 +55,16 @@
   {:else}
     <!-- Horizontal fret lines -->
     {#each Array(fretCount + 1) as _, i}
-      <line
-        x1="0"
-        y1={i * fretSpacing}
-        x2={neckWidth}
-        y2={i * fretSpacing}
-        stroke={fretColor}
-        stroke-width={fretWidth}
-      />
+      {#if !(skipFirstFretLine && i === 0)}
+        <line
+          x1="0"
+          y1={i * fretSpacing}
+          x2={neckWidth}
+          y2={i * fretSpacing}
+          stroke={fretColor}
+          stroke-width={fretWidth}
+        />
+      {/if}
     {/each}
     <!-- Vertical string lines -->
     {#each Array(stringCount) as _, j}

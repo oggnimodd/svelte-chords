@@ -50,13 +50,13 @@
 </script>
 
 <div class="mx-auto max-w-4xl px-4 py-20">
-  <div class="mt-4 flex gap-3">
+  <div class="mt-4 grid grid-cols-4 gap-4">
     {#each chordsGuitar as chord}
       <ChordDiagram
         {chord}
         instrument="guitar"
         orientation="vertical"
-        nutWidth={5}
+        nutWidth={6}
         nutColor="black"
         dotRadius={12}
         dotColor="blue"
@@ -76,13 +76,13 @@
   </div>
 
   <!-- Guitar horizontal chords -->
-  <div class="mt-4 flex gap-3">
+  <div class="mt-4 grid grid-cols-4 gap-4">
     {#each chordsGuitar as chord}
       <ChordDiagram
         {chord}
         instrument="guitar"
         orientation="horizontal"
-        nutWidth={5}
+        nutWidth={6}
         nutColor="black"
         fretCount={5}
         stringCount={6}
