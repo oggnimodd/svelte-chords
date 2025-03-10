@@ -19,11 +19,6 @@
   const offsetY = $derived(() =>
     orientation === "horizontal" ? -extra() / 2 : 0
   );
-
-  // Fully round the nut along the fixed side
-  const rx = $derived(() =>
-    orientation === "horizontal" ? width / 2 : height / 2
-  );
 </script>
 
 <rect
@@ -32,5 +27,4 @@
   width={newWidth()}
   height={newHeight()}
   fill={color}
-  rx={rx()}
 />

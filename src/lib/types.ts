@@ -68,7 +68,9 @@ export type ChordDiagramProps = {
   dotRadius?: number;
   dotColor?: string;
   stringColor?: string;
+  stringWidth?: number;
   fretColor?: string;
+  fretWidth?: number;
   showFingerNumbers?: boolean;
   barreColor?: string;
   barreThickness?: number;

@@ -4,42 +4,48 @@
   import Dot from "./Dot.svelte";
   import type { ChordDiagramProps } from "./types.js";
 
-  let container: HTMLDivElement | null = $state(null);
-  let parentWidth = $state(0);
-
+  // Get props as before.
   let {
     chord,
     orientation = "horizontal",
     nutWidth = 10,
     nutColor = "black",
     stringColor = "gray",
+    stringWidth = 1,
     fretColor = "gray",
+    fretWidth = 1,
     instrument = "guitar",
     boxAspectRatio = 1,
+    dotRadius = 10,
+    dotColor = "black",
   }: ChordDiagramProps = $props();
 
   const stringCount = $derived(instrument === "guitar" ? 6 : 4);
   const fretCount = $derived(instrument === "guitar" ? 5 : 4);
 
-  // Determine fret spacing.
+  // Use a fixed coordinate system width.
+  const coordWidth = 100;
+
+  // Calculate fret spacing based on our coordinate system.
   const fretSpacing = $derived(() => {
     if (orientation === "horizontal") {
-      return (parentWidth - (showNut() ? nutWidth : 0)) / fretCount;
+      return (coordWidth - (showNut() ? nutWidth : 0)) / fretCount;
     } else {
-      return boxAspectRatio * (parentWidth / (stringCount - 1));
+      return boxAspectRatio * (coordWidth / (stringCount - 1));
     }
   });
 
-  // Determine string spacing.
+  // Calculate string spacing based on our coordinate system.
   const stringSpacing = $derived(() => {
     if (orientation === "horizontal") {
       return fretSpacing() / boxAspectRatio;
     } else {
-      return parentWidth / (stringCount - 1);
+      return coordWidth / (stringCount - 1);
     }
   });
 
-  const width = $derived(() => parentWidth);
+  // Set the virtual width and height for the SVG.
+  const width = $derived(() => coordWidth);
   const height = $derived(() => {
     if (orientation === "horizontal") {
       return (stringCount - 1) * stringSpacing();
@@ -48,7 +54,7 @@
     }
   });
 
-  // Parse chord.frets as an array of numbers or "x".
+  // Parse chord.frets as before.
   const frets = $derived(() => {
     if (typeof chord.frets === "string") {
       return chord.frets.split("").map((f: string) => {
@@ -78,14 +84,11 @@
   const showNut = $derived(() => offset() === 0);
 </script>
 
-<!-- Bind both the container element and its clientWidth -->
-<div bind:this={container} bind:clientWidth={parentWidth} class="h-auto w-full">
+<div style="width: 100%; aspect-ratio: {width()}/{height()}">
   <svg
-    width={width()}
-    height={height()}
     viewBox={`0 0 ${width()} ${height()}`}
-    overflow="visible"
     preserveAspectRatio="xMinYMin meet"
+    overflow="visible"
   >
     {#if orientation === "horizontal"}
       {#if showNut()}
@@ -98,15 +101,14 @@
           parentWidth={width()}
         />
       {/if}
-      <!-- Translate the neck by nutWidth if the nut is rendered -->
       <g transform={`translate(${showNut() ? nutWidth : 0}, 0)`}>
         <Neck
           {stringCount}
           {fretCount}
           stringSpacing={stringSpacing()}
           fretSpacing={fretSpacing()}
-          stringWidth={2}
-          fretWidth={2}
+          {stringWidth}
+          {fretWidth}
           {stringColor}
           {fretColor}
           {orientation}
@@ -117,8 +119,8 @@
             <Dot
               x={((fret as number) - offset() - 0.5) * fretSpacing()}
               y={k * stringSpacing()}
-              radius={10}
-              color="black"
+              radius={dotRadius}
+              color={dotColor}
               showFingerNumber={false}
             />
           {/if}
@@ -141,8 +143,8 @@
           {fretCount}
           stringSpacing={stringSpacing()}
           fretSpacing={fretSpacing()}
-          stringWidth={2}
-          fretWidth={2}
+          {stringWidth}
+          {fretWidth}
           {stringColor}
           {fretColor}
           {orientation}
@@ -153,8 +155,8 @@
             <Dot
               x={k * stringSpacing()}
               y={((fret as number) - offset() - 0.5) * fretSpacing()}
-              radius={10}
-              color="black"
+              radius={dotRadius}
+              color={dotColor}
               showFingerNumber={false}
             />
           {/if}
