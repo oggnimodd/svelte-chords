@@ -108,7 +108,7 @@
         {chord}
         instrument="ukulele"
         orientation="vertical"
-        nutWidth={4}
+        nutWidth={6}
         nutColor="black"
         dotRadius={7}
         dotColor="black"
@@ -135,7 +135,7 @@
         {chord}
         instrument="ukulele"
         orientation="horizontal"
-        nutWidth={4}
+        nutWidth={6}
         nutColor="black"
         dotRadius={7}
         dotColor="black"
