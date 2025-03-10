@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import Nut from "./Nut.svelte";
   import Neck from "./Neck.svelte";
   import Dot from "./Dot.svelte";
@@ -22,20 +21,9 @@
   const stringCount = $derived(instrument === "guitar" ? 6 : 4);
   const fretCount = $derived(instrument === "guitar" ? 5 : 4);
 
-  onMount(() => {
-    if (container) {
-      const resizeObserver = new ResizeObserver((entries) => {
-        parentWidth = entries[0].contentRect.width;
-      });
-      resizeObserver.observe(container);
-      return () => resizeObserver.disconnect();
-    }
-  });
-
   // Determine fret spacing.
   const fretSpacing = $derived(() => {
     if (orientation === "horizontal") {
-      // If there's a nut, reduce available width.
       return (parentWidth - (showNut() ? nutWidth : 0)) / fretCount;
     } else {
       return boxAspectRatio * (parentWidth / (stringCount - 1));
@@ -56,7 +44,6 @@
     if (orientation === "horizontal") {
       return (stringCount - 1) * stringSpacing();
     } else {
-      // Add nut height if rendered.
       return (showNut() ? nutWidth : 0) + fretCount * fretSpacing();
     }
   });
@@ -91,7 +78,8 @@
   const showNut = $derived(() => offset() === 0);
 </script>
 
-<div bind:this={container} class="h-auto w-full">
+<!-- Bind both the container element and its clientWidth -->
+<div bind:this={container} bind:clientWidth={parentWidth} class="h-auto w-full">
   <svg
     width={width()}
     height={height()}
