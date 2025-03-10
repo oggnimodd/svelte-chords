@@ -91,6 +91,8 @@
     return minFret > 1 ? minFret - 1 : 0;
   });
 
+  const baseFret = $derived(offset() + 1);
+
   // Render the nut only if the chord starts at fret 1.
   const showNut = $derived(() => offset() === 0);
 
@@ -136,6 +138,12 @@
           {stringCount}
         />
       {/each}
+      <!-- Base fret indicator -->
+      {#if baseFret > 1}
+        <g transform={`translate(${fretSpacing() / 2}, -${dotRadius / 2 + 5})`}>
+          <text width={10} font-size={10}>{baseFret}fr</text>
+        </g>
+      {/if}
       <g transform={`translate(${instrument === "guitar" ? 7 : 8}, 0)`}>
         {#if showNut()}
           <!-- Nut on the left -->
@@ -184,6 +192,7 @@
           {stringCount}
         />
       {/each}
+
       <g transform={`translate(0, ${instrument === "guitar" ? 6 : 8})`}>
         {#if showNut()}
           <!-- Nut on top -->
@@ -196,6 +205,15 @@
           />
         {/if}
         <g transform={`translate(0, ${nutWidth})`}>
+          <!-- Base fret indicator -->
+          {#if baseFret > 1}
+            <g
+              transform={`translate(-${dotRadius * 3}, ${nutWidth + fretSpacing() / 2})`}
+            >
+              <text width={10} font-size={10}>{baseFret}fr</text>
+            </g>
+          {/if}
+
           <Neck
             {stringCount}
             {fretCount}
