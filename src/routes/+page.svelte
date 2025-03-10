@@ -100,4 +100,57 @@
       />
     {/each}
   </div>
+
+  <!-- Ukulele -->
+  <div class="mt-4 grid grid-cols-4 gap-10">
+    {#each chordsUkulele as chord}
+      <ChordDiagram
+        {chord}
+        instrument="ukulele"
+        orientation="vertical"
+        nutWidth={4}
+        nutColor="black"
+        dotRadius={7}
+        dotColor="black"
+        stringColor="black"
+        fretColor="black"
+        showFingerNumbers={true}
+        barreColor="rgba(0,0,0,0.5)"
+        barreThickness={4}
+        backgroundColor="white"
+        titleFontSize={20}
+        titleFontFamily="Arial, sans-serif"
+        titleColor="black"
+        showTitle={true}
+        markerSize={16}
+        boxAspectRatio={0.8}
+      />
+    {/each}
+  </div>
+
+  <!-- Ukulele vertical -->
+  <div class="mt-4 grid grid-cols-4 gap-10">
+    {#each chordsUkulele as chord}
+      <ChordDiagram
+        {chord}
+        instrument="ukulele"
+        orientation="horizontal"
+        nutWidth={4}
+        nutColor="black"
+        dotRadius={7}
+        dotColor="black"
+        stringColor="black"
+        fretColor="black"
+        showFingerNumbers={true}
+        barreColor="rgba(0,0,0,0.5)"
+        barreThickness={4}
+        backgroundColor="white"
+        titleFontSize={20}
+        titleFontFamily="Arial, sans-serif"
+        titleColor="black"
+        showTitle={true}
+        markerSize={16}
+      />
+    {/each}
+  </div>
 </div>

@@ -68,16 +68,30 @@
 
   // Compute offset: if barres exist use that; otherwise, use lowest fretted note.
   const offset = $derived(() => {
-    if (chord.barres) {
-      return (chord.barres as number) - 1;
-    }
+    // figure out the minimum *non-open* fret
     let minFret = Infinity;
+    let hasOpenString = false;
+
     for (const f of frets()) {
-      if (typeof f === "number" && f > 0 && f < minFret) {
-        minFret = f;
+      if (typeof f === "number") {
+        if (f === 0) {
+          hasOpenString = true;
+        } else if (f < minFret) {
+          minFret = f;
+        }
       }
     }
-    return minFret === Infinity ? 0 : minFret - 1;
+
+    // If there's an open string, offset can't be > 0
+    if (hasOpenString) {
+      return 0;
+    }
+    // If everything was muted or something weird, fallback
+    if (minFret === Infinity) {
+      return 0;
+    }
+    // Otherwise, shift the diagram so the chord’s lowest fret is at position 1
+    return minFret > 1 ? minFret - 1 : 0;
   });
 
   // Render the nut only if the chord starts at fret 1.
