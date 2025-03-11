@@ -22,8 +22,8 @@
     ref = $bindable(),
   }: ChordDiagramProps = $props();
 
-  const stringCount = instrument === "guitar" ? 6 : 4;
-  const fretCount = instrument === "guitar" ? 5 : 4;
+  const stringCount = $derived(instrument === "guitar" ? 6 : 4);
+  const fretCount = $derived(instrument === "guitar" ? 5 : 4);
 
   let V = $state(100);
 
