@@ -31,19 +31,13 @@ async function main() {
   console.log("Cloning repository...");
   await runCommand("git", ["clone", repoUrl]);
 
-  // Ensure the "lib" folder exists in the cloned repo; needed for the build generation.
+  // Always create a fresh lib folder inside the cloned repo.
   const libFolder = path.join(repoDir, "lib");
-  try {
-    await fs.stat(libFolder);
-    console.log("Lib folder already exists.");
-  } catch (err: any) {
-    if (err.code === "ENOENT") {
-      console.log("Lib folder doesn't exist. Creating it...");
-      await fs.mkdir(libFolder, { recursive: true });
-    } else {
-      throw err;
-    }
-  }
+  console.log("Creating a fresh lib folder in the cloned repo...");
+  // Remove any existing lib folder if it exists.
+  await fs.rm(libFolder, { recursive: true, force: true });
+  // Create a new lib folder.
+  await fs.mkdir(libFolder, { recursive: true });
 
   console.log(
     "Changing directory to cloned repo and installing dependencies..."
@@ -56,18 +50,14 @@ async function main() {
   console.log("Moving the generated library to the target folder...");
   // The generated library is assumed to be in the "lib" folder inside the repo.
   const generatedDir = path.join(repoDir, "lib");
-  // Target folder is now "../src/lib/chords-library" relative to process.cwd()
-  const targetDir = path.join(process.cwd(), "../src/lib/chords-db");
+  // Target folder is now "../src/lib/chords-db" relative to process.cwd()
+  const targetDir = path.join(process.cwd(), "./src/lib/chords-db");
 
   // Ensure the parent directory of the target folder exists.
   await fs.mkdir(path.dirname(targetDir), { recursive: true });
 
   // Remove the target folder if it already exists.
-  try {
-    await fs.rm(targetDir, { recursive: true, force: true });
-  } catch (err: any) {
-    if (err.code !== "ENOENT") throw err;
-  }
+  await fs.rm(targetDir, { recursive: true, force: true });
 
   // Move (rename) the generated folder to the target location.
   await fs.rename(generatedDir, targetDir);
