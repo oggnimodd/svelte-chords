@@ -5,6 +5,7 @@
   // @ts-ignore
   import ukuleleChordsData from "$lib/chords-db/ukulele.json";
   import ChordDiagram from "$lib/ChordDiagram.svelte";
+  import { toPng } from "html-to-image";
 
   // Load chord data (cast to ChordsDB)
   let guitarChords = guitarChordsData as ChordsDB;
@@ -91,6 +92,36 @@
           heading: "text-emerald-700",
         };
   });
+
+  const downloadChordAsPng = (e: MouseEvent) => {
+    // Check if the event target is the same as the currentTarget (the button)
+    // This ensures the function only runs when the button itself is clicked
+    if (e.target !== e.currentTarget) {
+      return; // Exit if clicked on a child element
+    }
+
+    // Find the ChordDiagram element inside the clicked button
+    const buttonElement = e.currentTarget as HTMLElement;
+
+    if (buttonElement) {
+      // Use the toPng function to convert the chord diagram to an image
+      toPng(buttonElement)
+        .then((dataUrl: string) => {
+          // Create a download link
+          const link = document.createElement("a");
+          link.download = `${chordName}-chord.png`;
+          link.href = dataUrl;
+
+          // Trigger download
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        })
+        .catch((error: Error) => {
+          console.error("Error generating chord image:", error);
+        });
+    }
+  };
 </script>
 
 <div class={`min-h-screen ${themeColors.bg} px-4 py-12 sm:px-6 lg:px-8`}>
@@ -207,17 +238,22 @@
         class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4"
       >
         {#each variations as position, i}
-          <div
-            class={`${themeColors.card} overflow-hidden rounded-xl shadow-lg ${themeColors.shadow} border ${themeColors.border} transform transition-all duration-300 hover:scale-105 hover:shadow-xl`}
+          <button
+            onclick={downloadChordAsPng}
+            class={`${themeColors.card} overflow-hidden rounded-xl shadow-lg ${themeColors.shadow} border ${themeColors.border} transform overflow-hidden transition-all duration-300 hover:scale-105 hover:shadow-xl`}
           >
-            <div class={`bg-gradient-to-r ${themeColors.accent} px-4 py-2`}>
+            <div
+              class={`bg-gradient-to-r ${themeColors.accent} pointer-events-none flex items-center justify-center px-4 py-2`}
+            >
               <h3
                 class="text-center text-lg font-medium font-semibold text-white"
               >
                 {chordName}
               </h3>
             </div>
-            <div class="flex items-center justify-center p-4">
+            <div
+              class="pointer-events-none flex items-center justify-center p-4"
+            >
               <!-- Pass the position data with custom colors -->
               <ChordDiagram
                 chord={position}
@@ -234,7 +270,7 @@
                 stringWidth={0.8}
               />
             </div>
-          </div>
+          </button>
         {/each}
       </div>
     {/if}
