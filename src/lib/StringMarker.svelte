@@ -3,12 +3,11 @@
   let {
     type,
     orientation,
-    stringSpacing,
-    stringCount,
+    fretSpacing,
     x = 0,
     y = 0,
   }: StringMarkerProps = $props();
-  const markerSize = stringSpacing / 6;
+  const markerSize = fretSpacing / 6;
 </script>
 
 <g transform={`translate(${x}, ${y})`}>

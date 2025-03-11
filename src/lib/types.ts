@@ -1,22 +1,11 @@
 export type Orientation = "horizontal" | "vertical";
 
-// Replace your old "ChordDefinition" with this:
 export type ChordDefinition = {
-  // e.g. [3,0,0,0,3,3] or [1,1,1,3,4,1], or "x" for skipped strings
-  frets: Array<number | "x"> | string;
-
-  // e.g. [1,0,0,0,2,3]
+  frets: number[] | string;
   fingers: number[] | string;
-
-  // e.g. 1 for open chords, or 5 for chords starting at 5th fret, etc.
   baseFret: number;
-
   barres?: number[];
-
-  // If it’s a “true” barre chord, set capo=true
   capo?: boolean;
-
-  // If your DB has MIDI data, keep it. Otherwise omit.
   midi?: number[];
 };
 
@@ -47,6 +36,7 @@ export type StringMarkerProps = {
   orientation: Orientation;
   stringSpacing: number;
   stringCount: number;
+  fretSpacing: number;
   x?: number;
   y?: number;
 };

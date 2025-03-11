@@ -77,9 +77,7 @@
   // Helper functions to parse frets and fingers
   const parseFrets = () =>
     typeof chord.frets === "string"
-      ? chord.frets
-          .split("")
-          .map((f) => (f.toLowerCase() === "x" ? "x" : parseInt(f, 16)))
+      ? chord.frets.split(",").map((s) => parseInt(s.trim()))
       : chord.frets;
 
   const parseFingers = () =>
@@ -98,15 +96,15 @@
   // Markers helper; reverse true for horizontal markers
   const getMarkers = (reverse: boolean) => {
     const raw = parseFrets();
-    const markers: {
-      type: "x" | "o";
-      stringIndex: number;
-    }[] = [];
+    const markers: { type: "x" | "o"; stringIndex: number }[] = [];
     for (let i = 0; i < stringCount; i++) {
       const index = reverse ? stringCount - 1 - i : i;
       const val = raw[index];
-      if (val === 0) markers.push({ type: "o", stringIndex: i });
-      else if (val === "x") markers.push({ type: "x", stringIndex: i });
+      if (val === 0) {
+        markers.push({ type: "o", stringIndex: i });
+      } else if (val === -1) {
+        markers.push({ type: "x", stringIndex: i });
+      }
     }
     return markers;
   };
@@ -145,6 +143,7 @@
         stringIndex={marker.stringIndex}
         x={baseIndicatorSize + marker.stringIndex * stringSpacingVertical}
         y={markerHeightVertical / 2}
+        fretSpacing={fretSpacingVertical}
       />
     {/each}
 
@@ -212,6 +211,7 @@
         x={baseIndicatorSize / 2}
         y={baseIndicatorHeightHorizontal +
           marker.stringIndex * stringSpacingHorizontal}
+        fretSpacing={fretSpacingHorizontal}
       />
     {/each}
 
