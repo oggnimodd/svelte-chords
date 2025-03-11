@@ -1,3 +1,4 @@
+<!-- ChordDiagram.svelte -->
 <script lang="ts">
   import Nut from "./Nut.svelte";
   import Neck from "./Neck.svelte";
@@ -29,48 +30,80 @@
   // Virtual width for immediate rendering
   let V = $state(100);
 
-  // Derived reactive values using $derived(expression)
-  let baseIndicatorSize = $derived(V * 0.3);
+  let baseFretIndicatorSize = $derived.by(() => V * 0.22);
+  let markerSpacingSize = $derived.by(() => V * 0.1);
+
+  let baseIndicatorSize = $derived.by(() => {
+    if (orientation === "vertical") {
+      return baseFretIndicatorSize;
+    } else {
+      return markerSpacingSize;
+    }
+  });
 
   /* --- VERTICAL LAYOUT --- */
-  let contentWidthVertical = $derived(V - baseIndicatorSize);
-  let stringSpacingVertical = $derived(
-    contentWidthVertical / (stringCount - 1)
+  let contentWidthVertical = $derived.by(() => V - baseIndicatorSize);
+  let stringSpacingVertical = $derived.by(
+    () => contentWidthVertical / (stringCount - 1)
   );
-  let fretSpacingVertical = $derived(boxAspectRatio * stringSpacingVertical);
-  let neckWidthVertical = contentWidthVertical;
-  let neckHeightVertical = $derived(fretCount * fretSpacingVertical);
-  let markerHeightVertical = baseIndicatorSize;
+  let fretSpacingVertical = $derived.by(
+    () => boxAspectRatio * stringSpacingVertical
+  );
+  let neckHeightVertical = $derived.by(() => fretCount * fretSpacingVertical);
+
+  // Now markerHeightVertical depends on orientation
+  let markerHeightVertical = $derived.by(() => {
+    // For vertical orientation: top margin = small (0.1*V)
+    // For horizontal orientation: top margin = 0 (no effect)
+    if (orientation === "vertical") {
+      return markerSpacingSize;
+    } else {
+      return 0;
+    }
+  });
+
   let nutHeightVertical = nutWidth;
 
   // Add dotRadius so right/bottom dots aren't cut off
-  let totalHeightVertical = $derived(
-    markerHeightVertical + nutHeightVertical + neckHeightVertical + dotRadius
+  let totalHeightVertical = $derived.by(
+    () =>
+      markerHeightVertical + nutHeightVertical + neckHeightVertical + dotRadius
   );
-  let totalWidthVertical = $derived(V + dotRadius);
+  let totalWidthVertical = $derived.by(() => V + dotRadius);
 
   /* --- HORIZONTAL LAYOUT --- */
-  let markerWidthHorizontal = baseIndicatorSize;
+  // baseIndicatorHeightHorizontal depends on orientation
+  let baseIndicatorHeightHorizontal = $derived.by(() => {
+    // For horizontal orientation: top margin = big (0.3*V)
+    // For vertical orientation: top margin = 0
+    if (orientation === "horizontal") {
+      return baseFretIndicatorSize;
+    } else {
+      return 0;
+    }
+  });
+
   let nutWidthHorizontal = nutWidth;
-  let neckWidthHorizontal = $derived(
-    V - markerWidthHorizontal - nutWidthHorizontal
+  let neckWidthHorizontal = $derived.by(
+    () => V - baseIndicatorHeightHorizontal - nutWidthHorizontal
   );
-  let fretSpacingHorizontal = $derived(neckWidthHorizontal / fretCount);
-  let stringSpacingHorizontal = $derived(
-    fretSpacingHorizontal / boxAspectRatio
+  let fretSpacingHorizontal = $derived.by(
+    () => neckWidthHorizontal / fretCount
   );
-  let diagramHeightHorizontal = $derived(
-    (stringCount - 1) * stringSpacingHorizontal
+  let stringSpacingHorizontal = $derived.by(
+    () => fretSpacingHorizontal / boxAspectRatio
   );
-  let baseIndicatorHeightHorizontal = baseIndicatorSize;
+  let diagramHeightHorizontal = $derived.by(
+    () => (stringCount - 1) * stringSpacingHorizontal
+  );
 
   // Add dotRadius so right/bottom dots aren't cut off
-  let totalHeightHorizontal = $derived(
-    baseIndicatorHeightHorizontal + diagramHeightHorizontal + dotRadius
+  let totalHeightHorizontal = $derived.by(
+    () => baseIndicatorHeightHorizontal + diagramHeightHorizontal + dotRadius
   );
-  let totalWidthHorizontal = $derived(V + dotRadius);
+  let totalWidthHorizontal = $derived.by(() => V + dotRadius);
 
-  // Compute fret offset
+  // Compute fret offset function
   function computeOffset(): number {
     let frets: (number | string)[];
     if (typeof chord.frets === "string") {
@@ -80,6 +113,7 @@
     } else {
       frets = chord.frets;
     }
+
     let minFret = Infinity;
     let hasOpen = false;
     for (const f of frets) {
@@ -95,56 +129,55 @@
     if (minFret === Infinity) return 0;
     return minFret > 1 ? minFret - 1 : 0;
   }
-  let offset = $state(computeOffset());
-  let baseFret = $derived(offset + 1);
 
-  // Markers: vertical orientation (markers above nut)
-  let markersVertical = $derived(
-    (() => {
-      let raw =
-        typeof chord.frets === "string"
-          ? chord.frets
-              .split("")
-              .map((f) => (f.toLowerCase() === "x" ? "x" : parseInt(f, 10)))
-          : chord.frets;
-      let result: { type: "x" | "o"; stringIndex: number }[] = [];
-      for (let i = 0; i < stringCount; i++) {
-        const val = raw[i];
-        if (val === 0) result.push({ type: "o", stringIndex: i });
-        else if (val === "x") result.push({ type: "x", stringIndex: i });
-      }
-      return result;
-    })()
-  );
+  let offset = $state(computeOffset());
+  let baseFret = $derived.by(() => offset + 1);
+
+  // Markers: vertical orientation (markers above the nut)
+  let markersVertical = $derived.by(() => {
+    let raw =
+      typeof chord.frets === "string"
+        ? chord.frets
+            .split("")
+            .map((f) => (f.toLowerCase() === "x" ? "x" : parseInt(f, 10)))
+        : chord.frets;
+
+    let result: { type: "x" | "o"; stringIndex: number }[] = [];
+    for (let i = 0; i < stringCount; i++) {
+      const val = raw[i];
+      if (val === 0) result.push({ type: "o", stringIndex: i });
+      else if (val === "x") result.push({ type: "x", stringIndex: i });
+    }
+    return result;
+  });
 
   // Markers: horizontal orientation (markers to the left)
-  let markersHorizontal = $derived(
-    (() => {
-      let raw =
-        typeof chord.frets === "string"
-          ? chord.frets
-              .split("")
-              .map((f) => (f.toLowerCase() === "x" ? "x" : parseInt(f, 10)))
-          : chord.frets;
-      let result: { type: "x" | "o"; stringIndex: number }[] = [];
-      for (let i = 0; i < stringCount; i++) {
-        const val = raw[stringCount - 1 - i];
-        if (val === 0) result.push({ type: "o", stringIndex: i });
-        else if (val === "x") result.push({ type: "x", stringIndex: i });
-      }
-      return result;
-    })()
-  );
+  let markersHorizontal = $derived.by(() => {
+    let raw =
+      typeof chord.frets === "string"
+        ? chord.frets
+            .split("")
+            .map((f) => (f.toLowerCase() === "x" ? "x" : parseInt(f, 10)))
+        : chord.frets;
+
+    let result: { type: "x" | "o"; stringIndex: number }[] = [];
+    for (let i = 0; i < stringCount; i++) {
+      const val = raw[stringCount - 1 - i];
+      if (val === 0) result.push({ type: "o", stringIndex: i });
+      else if (val === "x") result.push({ type: "x", stringIndex: i });
+    }
+    return result;
+  });
 
   // Parse frets for dots
-  let fretsVertical = $derived(
+  let fretsVertical = $derived.by(() =>
     typeof chord.frets === "string"
       ? chord.frets
           .split("")
           .map((f) => (f.toLowerCase() === "x" ? "x" : parseInt(f, 10)))
       : chord.frets
   );
-  let fretsHorizontal = $derived(
+  let fretsHorizontal = $derived.by(() =>
     typeof chord.frets === "string"
       ? chord.frets
           .split("")
@@ -154,10 +187,10 @@
   );
 
   // Fingers for dots
-  let fingersVertical = $derived(
+  let fingersVertical = $derived.by(() =>
     typeof chord.fingers === "string" ? chord.fingers.split("") : chord.fingers
   );
-  let fingersHorizontal = $derived(
+  let fingersHorizontal = $derived.by(() =>
     typeof chord.fingers === "string"
       ? chord.fingers.split("").reverse()
       : (chord.fingers as number[]).slice().reverse()
@@ -167,16 +200,16 @@
 <svg
   bind:this={ref}
   width="100%"
+  style="overflow: visible;"
   viewBox={orientation === "vertical"
     ? `0 0 ${totalWidthVertical} ${totalHeightVertical}`
     : `0 0 ${totalWidthHorizontal} ${totalHeightHorizontal}`}
-  style="overflow: visible;"
 >
   {#if orientation === "vertical"}
     {#if offset > 0}
       <!-- Base fret indicator on left -->
       <text
-        x={baseIndicatorSize / 2}
+        x={baseIndicatorSize / 3}
         y={markerHeightVertical + nutHeightVertical + fretSpacingVertical / 2}
         font-size="10"
         text-anchor="middle"
@@ -185,6 +218,7 @@
         {baseFret}fr
       </text>
     {/if}
+
     <!-- String markers (above the nut) -->
     {#each markersVertical as marker}
       <StringMarker
@@ -197,6 +231,7 @@
         y={markerHeightVertical / 2}
       />
     {/each}
+
     <!-- Only draw nut if offset===0, but keep the nut spacing for layout -->
     {#if offset === 0}
       <Nut
@@ -209,6 +244,7 @@
         y={markerHeightVertical}
       />
     {/if}
+
     <!-- Neck always starts after nut space, even if nut isn't drawn -->
     <Neck
       x={baseIndicatorSize}
@@ -224,6 +260,7 @@
       orientation="vertical"
       skipFirstFretLine={false}
     />
+
     <!-- Dots -->
     {#each fretsVertical as fret, i}
       {#if typeof fret === "number" && fret > 0}
@@ -243,10 +280,8 @@
     {#if offset > 0}
       <!-- Base fret indicator on top -->
       <text
-        x={markerWidthHorizontal +
-          nutWidthHorizontal +
-          fretSpacingHorizontal / 2}
-        y={baseIndicatorHeightHorizontal / 2}
+        x={baseIndicatorSize + nutWidthHorizontal + fretSpacingHorizontal / 2}
+        y={baseIndicatorHeightHorizontal / 3}
         font-size="10"
         text-anchor="middle"
         dominant-baseline="central"
@@ -254,6 +289,7 @@
         {baseFret}fr
       </text>
     {/if}
+
     <!-- String markers (to the left) -->
     {#each markersHorizontal as marker}
       <StringMarker
@@ -262,11 +298,12 @@
         stringSpacing={stringSpacingHorizontal}
         {stringCount}
         stringIndex={marker.stringIndex}
-        x={markerWidthHorizontal / 2}
+        x={baseIndicatorSize / 2}
         y={baseIndicatorHeightHorizontal +
           marker.stringIndex * stringSpacingHorizontal}
       />
     {/each}
+
     <!-- Only draw nut if offset===0, but keep the nut spacing for layout -->
     {#if offset === 0}
       <Nut
@@ -275,13 +312,14 @@
         color={nutColor}
         parentWidth={nutWidthHorizontal}
         orientation="horizontal"
-        x={markerWidthHorizontal}
+        x={baseIndicatorSize}
         y={baseIndicatorHeightHorizontal}
       />
     {/if}
+
     <!-- Neck always starts after nut space, even if nut isn't drawn -->
     <Neck
-      x={markerWidthHorizontal + nutWidthHorizontal}
+      x={baseIndicatorSize + nutWidthHorizontal}
       y={baseIndicatorHeightHorizontal}
       {stringCount}
       {fretCount}
@@ -294,11 +332,12 @@
       orientation="horizontal"
       skipFirstFretLine={false}
     />
+
     <!-- Dots -->
     {#each fretsHorizontal as fret, i}
       {#if typeof fret === "number" && fret > 0}
         <Dot
-          x={markerWidthHorizontal +
+          x={baseIndicatorSize +
             nutWidthHorizontal +
             (fret - offset - 0.5) * fretSpacingHorizontal}
           y={baseIndicatorHeightHorizontal + i * stringSpacingHorizontal}
