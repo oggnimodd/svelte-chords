@@ -74,35 +74,37 @@
   );
   let totalWidthHorizontal = $derived.by(() => V + dotRadius);
 
+  // Helper functions to parse frets and fingers
+  const parseFrets = () =>
+    typeof chord.frets === "string"
+      ? chord.frets
+          .split("")
+          .map((f) => (f.toLowerCase() === "x" ? "x" : parseInt(f, 16)))
+      : chord.frets;
+
   function computeOffset(): number {
-    const parsed =
-      typeof chord.frets === "string"
-        ? chord.frets
-            .split("")
-            .map((f) => (f.toLowerCase() === "x" ? "x" : parseInt(f, 10)))
-        : chord.frets;
-    let minFret = Infinity,
-      hasOpen = false;
+    // Use the same parseFrets logic:
+    const parsed = parseFrets();
+
+    let minFret = Infinity;
+    let hasOpen = false;
+
     for (const f of parsed) {
       if (typeof f === "number") {
-        if (f === 0) hasOpen = true;
-        else if (f < minFret) minFret = f;
+        if (f === 0) {
+          hasOpen = true;
+        } else if (f < minFret) {
+          minFret = f;
+        }
       }
     }
+
     if (hasOpen || minFret === Infinity) return 0;
     return minFret > 1 ? minFret - 1 : 0;
   }
 
   let offset = $state(computeOffset());
   let baseFret = $derived.by(() => offset + 1);
-
-  // Helper functions to parse frets and fingers
-  const parseFrets = () =>
-    typeof chord.frets === "string"
-      ? chord.frets
-          .split("")
-          .map((f) => (f.toLowerCase() === "x" ? "x" : parseInt(f, 10)))
-      : chord.frets;
 
   const parseFingers = () =>
     typeof chord.fingers === "string" ? chord.fingers.split("") : chord.fingers;
