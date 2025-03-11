@@ -68,5 +68,8 @@
     "**/*.{js,ts,jsx,tsx,json}": [
       "prettier --write ."
     ]
+  },
+  "dependencies": {
+    "html-to-image": "^1.11.13"
   }
 }

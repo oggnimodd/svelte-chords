@@ -62,7 +62,6 @@
         dotColor="black"
         stringColor="black"
         fretColor="black"
-        showFingerNumbers={true}
         barreColor="rgba(0,0,0,0.5)"
         barreThickness={8}
         backgroundColor="white"
@@ -88,7 +87,6 @@
         dotColor="black"
         stringColor="black"
         fretColor="black"
-        showFingerNumbers={true}
         barreColor="rgba(0,0,0,0.5)"
         barreThickness={8}
         backgroundColor="white"
@@ -114,7 +112,6 @@
         dotColor="black"
         stringColor="black"
         fretColor="black"
-        showFingerNumbers={true}
         barreColor="rgba(0,0,0,0.5)"
         barreThickness={4}
         backgroundColor="white"
@@ -141,7 +138,6 @@
         dotColor="black"
         stringColor="black"
         fretColor="black"
-        showFingerNumbers={true}
         barreColor="rgba(0,0,0,0.5)"
         barreThickness={4}
         backgroundColor="white"

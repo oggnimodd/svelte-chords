@@ -3,6 +3,7 @@
   import Neck from "./Neck.svelte";
   import StringMarker from "./StringMarker.svelte";
   import type { ChordDiagramProps } from "./types.js";
+  import Dot from "./Dot.svelte";
 
   let {
     chord,
@@ -15,6 +16,10 @@
     fretColor = "gray",
     fretWidth = 1,
     boxAspectRatio = 1,
+    dotRadius = 10,
+    dotColor = "black",
+    showFingerNumber = true,
+    ref = $bindable(),
   }: ChordDiagramProps = $props();
 
   // Number of strings/frets
@@ -75,7 +80,6 @@
   }
   let offset = $state(computeOffset());
   let baseFret = $derived(() => offset + 1);
-  let showNut = $derived(() => offset === 0);
 
   // Markers: "x" or "o" (or "0") from chord.frets
   // VERTICAL => left->right = 6..1
@@ -119,10 +123,31 @@
       return markerArea + nutWidth + neckHeight();
     }
   });
+
+  // Parse chord.frets as before.
+  const frets = $derived(() => {
+    if (typeof chord.frets === "string") {
+      return chord.frets.split("").map((f: string) => {
+        if (f === "x") return "x";
+        const val = parseInt(f, 16);
+        return isNaN(val) ? "x" : val;
+      });
+    }
+    return chord.frets;
+  });
+
+  // Normalize fingers to array format
+  const fingers = $derived(() => {
+    if (typeof chord.fingers === "string") {
+      return chord.fingers.split("");
+    }
+    return chord.fingers;
+  });
 </script>
 
 <!-- Main SVG container with 100% width and overflow visible -->
 <svg
+  bind:this={ref}
   width="100%"
   viewBox={`0 0 ${totalWidth()} ${totalHeight()}`}
   style="overflow: visible;"
@@ -182,6 +207,19 @@
           {orientation}
           skipFirstFretLine={false}
         />
+
+        {#each frets().slice().reverse() as fret, k}
+          {#if typeof fret === "number" && fret > 0}
+            <Dot
+              x={((fret as number) - offset - 0.5) * fretSpacing()}
+              y={k * stringSpacing()}
+              radius={dotRadius}
+              color={dotColor}
+              {showFingerNumber}
+              fingerNumber={fingers().reverse()[k]}
+            />
+          {/if}
+        {/each}
       </g>
     </g>
   {:else}
@@ -238,6 +276,18 @@
         {orientation}
         skipFirstFretLine={false}
       />
+      {#each frets() as fret, k}
+        {#if typeof fret === "number" && fret > 0}
+          <Dot
+            x={k * stringSpacing()}
+            y={((fret as number) - offset - 0.5) * fretSpacing()}
+            radius={dotRadius}
+            color={dotColor}
+            {showFingerNumber}
+            fingerNumber={chord.fingers[k]}
+          />
+        {/if}
+      {/each}
     </g>
   {/if}
 </svg>

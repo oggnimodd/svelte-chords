@@ -28,7 +28,7 @@ export type DotProps = {
   radius: number;
   color: string;
   showFingerNumber: boolean;
-  fingerNumber?: string;
+  fingerNumber?: number | string;
 };
 
 export type StringMarkerProps = {
@@ -74,7 +74,7 @@ export type ChordDiagramProps = {
   stringWidth?: number;
   fretColor?: string;
   fretWidth?: number;
-  showFingerNumbers?: boolean;
+  showFingerNumber?: boolean;
   barreColor?: string;
   barreThickness?: number;
   backgroundColor?: string;
@@ -85,4 +85,5 @@ export type ChordDiagramProps = {
   markerSize?: number;
   markerColor?: string;
   boxAspectRatio?: number;
+  ref?: HTMLOrSVGElement;
 };
