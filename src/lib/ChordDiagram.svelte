@@ -82,32 +82,13 @@
           .map((f) => (f.toLowerCase() === "x" ? "x" : parseInt(f, 16)))
       : chord.frets;
 
-  function computeOffset(): number {
-    // Use the same parseFrets logic:
-    const parsed = parseFrets();
-
-    let minFret = Infinity;
-    let hasOpen = false;
-
-    for (const f of parsed) {
-      if (typeof f === "number") {
-        if (f === 0) {
-          hasOpen = true;
-        } else if (f < minFret) {
-          minFret = f;
-        }
-      }
-    }
-
-    if (hasOpen || minFret === Infinity) return 0;
-    return minFret > 1 ? minFret - 1 : 0;
-  }
-
-  let offset = $state(computeOffset());
-  let baseFret = $derived.by(() => offset + 1);
-
   const parseFingers = () =>
     typeof chord.fingers === "string" ? chord.fingers.split("") : chord.fingers;
+
+  // Use chord.baseFret to determine the starting fret.
+  // Since chord.frets are now relative, we always use offset 0.
+  const offset = 0;
+  const baseFret = chord.baseFret; // from the chord definition
 
   let fretsVertical = $derived.by(() => parseFrets());
   let fretsHorizontal = $derived.by(() => parseFrets().slice().reverse());
@@ -143,7 +124,7 @@
     : `0 0 ${totalWidthHorizontal} ${totalHeightHorizontal}`}
 >
   {#if orientation === "vertical"}
-    {#if offset > 0}
+    {#if chord.baseFret > 1}
       <text
         x={baseIndicatorSize / 3}
         y={markerHeightVertical + nutHeightVertical + fretSpacingVertical / 2}
@@ -151,7 +132,7 @@
         text-anchor="middle"
         dominant-baseline="central"
       >
-        {baseFret}fr
+        {chord.baseFret}fr
       </text>
     {/if}
 
@@ -167,7 +148,7 @@
       />
     {/each}
 
-    {#if offset === 0}
+    {#if chord.baseFret === 1}
       <Nut
         width={contentWidthVertical}
         height={nutHeightVertical}
@@ -200,7 +181,7 @@
           x={baseIndicatorSize + i * stringSpacingVertical}
           y={markerHeightVertical +
             nutHeightVertical +
-            (fret - offset - 0.5) * fretSpacingVertical}
+            (fret - 0.5) * fretSpacingVertical}
           radius={dotRadius}
           color={dotColor}
           {showFingerNumber}
@@ -209,7 +190,7 @@
       {/if}
     {/each}
   {:else}
-    {#if offset > 0}
+    {#if chord.baseFret > 1}
       <text
         x={baseIndicatorSize + nutWidthHorizontal + fretSpacingHorizontal / 2}
         y={baseIndicatorHeightHorizontal / 3}
@@ -217,7 +198,7 @@
         text-anchor="middle"
         dominant-baseline="central"
       >
-        {baseFret}fr
+        {chord.baseFret}fr
       </text>
     {/if}
 
@@ -234,7 +215,7 @@
       />
     {/each}
 
-    {#if offset === 0}
+    {#if chord.baseFret === 1}
       <Nut
         width={nutWidthHorizontal}
         height={diagramHeightHorizontal}
@@ -266,7 +247,7 @@
         <Dot
           x={baseIndicatorSize +
             nutWidthHorizontal +
-            (fret - offset - 0.5) * fretSpacingHorizontal}
+            (fret - 0.5) * fretSpacingHorizontal}
           y={baseIndicatorHeightHorizontal + i * stringSpacingHorizontal}
           radius={dotRadius}
           color={dotColor}

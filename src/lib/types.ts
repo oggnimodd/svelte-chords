@@ -1,15 +1,23 @@
 export type Orientation = "horizontal" | "vertical";
 
+// Replace your old "ChordDefinition" with this:
 export type ChordDefinition = {
-  // Either a string (e.g. "x32010" or "xx5558") or an array of numbers,
-  // e.g. [1,3,3,2,1,1]
-  frets: string | number[];
-  // Either a string (e.g. "032010") or an array of numbers, e.g. [1,3,3,2,1,1]
-  fingers: string | number[];
-  // A single barre fret or an array of barre frets.
-  barres?: number | number[];
-  // If true, force start at fret 1 regardless of fretting.
+  // e.g. [3,0,0,0,3,3] or [1,1,1,3,4,1], or "x" for skipped strings
+  frets: Array<number | "x"> | string;
+
+  // e.g. [1,0,0,0,2,3]
+  fingers: number[] | string;
+
+  // e.g. 1 for open chords, or 5 for chords starting at 5th fret, etc.
+  baseFret: number;
+
+  barres?: number[];
+
+  // If it’s a “true” barre chord, set capo=true
   capo?: boolean;
+
+  // If your DB has MIDI data, keep it. Otherwise omit.
+  midi?: number[];
 };
 
 export type InstrumentType = "guitar" | "ukulele";
