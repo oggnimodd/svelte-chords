@@ -1,114 +1,136 @@
 <script lang="ts">
-  import type { ChordsDB, Chord, ChordName } from "$lib/types/chords-db.js";
+  import type {
+    ChordsDB,
+    Chord,
+    ChordName,
+    UkuleleChordsDB,
+  } from "$lib/types/chords-db.js";
   // @ts-ignore
   import guitarChordsData from "$lib/chords-db/guitar.json";
   // @ts-ignore
   import ukuleleChordsData from "$lib/chords-db/ukulele.json";
   import ChordDiagram from "$lib/ChordDiagram.svelte";
   import { toPng } from "html-to-image";
-  // Load chord data (cast to ChordsDB)
+
+  // Load chord data (cast to proper types)
   let guitarChords = guitarChordsData as ChordsDB;
-  // @ts-ignore
-  let ukuleleChords = ukuleleChordsData as ChordsDB;
-  // --- Mapping for keys ---
-  function displayKey(dbKey: string): string {
-    const map: Record<string, string> = {
-      Csharp: "C#",
-      Fsharp: "F#",
-      Dsharp: "D#",
-      Gsharp: "G#",
-      Asharp: "A#",
-    };
-    return map[dbKey] ?? dbKey;
-  }
-  // Mapping from display key back to database key.
-  const keyDisplayToDBMap: Record<string, ChordName> = {
+  let ukuleleChords = ukuleleChordsData as UkuleleChordsDB;
+
+  // Use canonical keys in the select component.
+  const canonicalKeys = [
+    "C",
+    "C#",
+    "D",
+    "D#",
+    "E",
+    "F",
+    "F#",
+    "G",
+    "G#",
+    "A",
+    "A#",
+    "B",
+  ];
+
+  // Mapping for guitar: keep type safety.
+  const guitarMapping: Record<string, ChordName> = {
     "C#": "Csharp",
     "F#": "Fsharp",
     "D#": "Eb",
     "G#": "Ab",
     "A#": "Bb",
   };
-  // Track user-selected key, suffix, instrument, and orientation with $state.
-  let selectedKey = $state("C");
+
+  // Mapping for ukulele: use plain strings because DB keys are flats.
+  const ukeMapping: Record<string, string> = {
+    "C#": "Db",
+    "F#": "Gb",
+    "D#": "Eb",
+    "G#": "Ab",
+    "A#": "Bb",
+  };
+
+  // Store user selections in canonical form.
+  let selectedKey = $state("C"); // always canonical, like "C#" not "Db"
   let selectedSuffix = $state("major");
   let selectedInstrument: "guitar" | "ukulele" = $state("guitar");
   let selectedOrientation: "vertical" | "horizontal" = $state("vertical");
-  // Derive the chord object for (key + suffix)
+
+  // Derive the chord object using the canonical key.
   let chordData = $derived.by(() => {
-    // Convert display key to DB key if available.
-    const dbKey: ChordName =
-      keyDisplayToDBMap[selectedKey] ?? (selectedKey as ChordName);
-    // Select the appropriate chord database based on instrument.
+    const dbKey =
+      selectedInstrument === "guitar"
+        ? (guitarMapping[selectedKey] ?? selectedKey)
+        : (ukeMapping[selectedKey] ?? selectedKey);
     const chordsDb =
       selectedInstrument === "guitar" ? guitarChords : ukuleleChords;
-    const chordList = chordsDb.chords[dbKey] ?? [];
+    // Cast dbKey to the proper key type to satisfy TS.
+    const chordList =
+      chordsDb.chords[dbKey as keyof typeof chordsDb.chords] ?? [];
     return chordList.find((c: Chord) => c.suffix === selectedSuffix);
   });
+
   // Derive the positions/variations.
   let variations = $derived.by(() => {
     return chordData?.positions ?? [];
   });
-  // Generate chord name
+
+  // Generate chord name using the canonical key.
   let chordName = $derived(
     `${selectedKey}${selectedSuffix !== "major" ? " " + selectedSuffix : ""}`
   );
-  // Get theme colors based on instrument
+
+  // Get theme colors based on instrument.
   let themeColors = $derived.by(() => {
     return selectedInstrument === "guitar"
       ? {
-          bg: "bg-gradient-to-br from-blue-50 to-indigo-100",
+          bg: "bg-gradient-to-br from-blue-100 to-indigo-100",
           accent: "from-blue-500 to-indigo-600",
-          dot: "#3B82F6", // blue-500
-          string: "#1E40AF", // blue-800
-          fret: "#1E293B", // slate-800
-          nut: "#334155", // slate-700
-          marker: "#6366F1", // indigo-500
-          card: "bg-white",
-          border: "border-blue-200",
-          shadow: "shadow-blue-100",
+          dot: "#3B82F6",
+          string: "#1E40AF",
+          fret: "#1E293B",
+          nut: "#334155",
+          marker: "#6366F1",
+          card: "bg-white/90",
+          border: "border border-blue-200",
+          shadow: "shadow-xl",
           text: "text-blue-900",
           heading: "text-blue-700",
-          button: "bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200",
+          button: "bg-blue-600 hover:bg-blue-700 text-white",
         }
       : {
-          bg: "bg-gradient-to-br from-emerald-50 to-teal-100",
+          bg: "bg-gradient-to-br from-emerald-100 to-teal-100",
           accent: "from-emerald-500 to-teal-600",
-          dot: "#10B981", // emerald-500
-          string: "#065F46", // emerald-800
-          fret: "#1E293B", // slate-800
-          nut: "#334155", // slate-700
-          marker: "#14B8A6", // teal-500
-          card: "bg-white",
-          border: "border-emerald-200",
-          shadow: "shadow-emerald-100",
+          dot: "#10B981",
+          string: "#065F46",
+          fret: "#1E293B",
+          nut: "#334155",
+          marker: "#14B8A6",
+          card: "bg-white/90",
+          border: "border border-emerald-200",
+          shadow: "shadow-xl",
           text: "text-emerald-900",
           heading: "text-emerald-700",
-          button:
-            "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-200",
+          button: "bg-emerald-600 hover:bg-emerald-700 text-white",
         };
   });
 
+  // Download the chord diagram as a PNG.
   const downloadChordAsPng = (element: HTMLElement) => {
     toPng(element)
       .then((dataUrl: string) => {
-        // Create a temporary canvas to apply border radius
         const img = new Image();
         img.onload = () => {
           const canvas = document.createElement("canvas");
           const ctx = canvas.getContext("2d");
           if (!ctx) return;
-          // Set dimensions
           canvas.width = img.width;
           canvas.height = img.height;
-          // Draw rounded rectangle
           ctx.beginPath();
-          const radius = 12; // Equivalent to rounded-xl
+          const radius = 12;
           ctx.roundRect(0, 0, canvas.width, canvas.height, radius);
           ctx.clip();
-          // Draw the image
           ctx.drawImage(img, 0, 0);
-          // Create download link
           const roundedDataUrl = canvas.toDataURL("image/png");
           const link = document.createElement("a");
           link.download = `${chordName}-chord.png`;
@@ -128,39 +150,41 @@
 <div class={`min-h-screen ${themeColors.bg} px-4 py-12 sm:px-6 lg:px-8`}>
   <div class="container mx-auto max-w-5xl">
     <!-- Header -->
-    <div class="mb-10 text-center">
-      <h1 class="mb-2 text-3xl font-bold tracking-tight sm:text-4xl">
-        <span class={themeColors.text}>Chord Finder</span>
+    <div class="mb-12 text-center">
+      <h1 class="mb-4 text-4xl font-extrabold tracking-tight sm:text-5xl">
+        <span
+          class="bg-gradient-to-r from-indigo-600 to-blue-600 bg-clip-text text-transparent"
+        >
+          Chord Finder
+        </span>
       </h1>
-      <p class="mx-auto max-w-2xl text-gray-600">
-        Find and explore different chord variations for guitar and ukulele
+      <p class="mx-auto max-w-2xl text-lg text-gray-700">
+        Explore stunning chord variations for both guitar and ukulele.
       </p>
     </div>
     <!-- Controls -->
     <div
-      class={`mb-8 rounded-xl border bg-white/70 p-6 shadow-lg backdrop-blur-sm ${themeColors.border}`}
+      class={`mb-10 rounded-2xl ${themeColors.card} ${themeColors.border} p-8 shadow-2xl backdrop-blur-lg`}
     >
       <div
-        class="flex flex-col items-center justify-center gap-4 sm:flex-row sm:flex-wrap sm:gap-6"
+        class="flex flex-col items-center justify-center gap-6 sm:flex-row sm:flex-wrap"
       >
         <div class="w-full sm:w-auto">
           <label
             for="key"
             class={`mb-1 block text-sm font-medium ${themeColors.heading}`}
-            >Key:</label
           >
+            Key:
+          </label>
           <select
             id="key"
-            class={`block w-full rounded-lg border-0 px-4 py-2.5 sm:w-32 ${themeColors.text} bg-white/80 shadow-sm ring-1 ring-gray-300 backdrop-blur-sm ring-inset focus:ring-2 focus:ring-blue-600 sm:text-sm sm:leading-6`}
+            class="block w-full rounded-xl border-0 bg-white px-4 py-2.5 text-gray-800 shadow focus:ring-2 focus:ring-indigo-500 sm:w-32 sm:text-sm"
             onchange={(e) =>
               (selectedKey = (e.target as HTMLSelectElement).value)}
           >
-            {#each guitarChords.keys as keyOption}
-              <option
-                value={displayKey(keyOption)}
-                selected={displayKey(keyOption) === selectedKey}
-              >
-                {displayKey(keyOption)}
+            {#each canonicalKeys as keyOption}
+              <option value={keyOption} selected={keyOption === selectedKey}>
+                {keyOption}
               </option>
             {/each}
           </select>
@@ -169,11 +193,12 @@
           <label
             for="suffix"
             class={`mb-1 block text-sm font-medium ${themeColors.heading}`}
-            >Suffix:</label
           >
+            Suffix:
+          </label>
           <select
             id="suffix"
-            class={`block w-full rounded-lg border-0 px-4 py-2.5 sm:w-48 ${themeColors.text} bg-white/80 shadow-sm ring-1 ring-gray-300 backdrop-blur-sm ring-inset focus:ring-2 focus:ring-blue-600 sm:text-sm sm:leading-6`}
+            class="block w-full rounded-xl border-0 bg-white px-4 py-2.5 text-gray-800 shadow focus:ring-2 focus:ring-indigo-500 sm:w-48 sm:text-sm"
             onchange={(e) =>
               (selectedSuffix = (e.target as HTMLSelectElement).value)}
           >
@@ -191,11 +216,12 @@
           <label
             for="instrument"
             class={`mb-1 block text-sm font-medium ${themeColors.heading}`}
-            >Instrument:</label
           >
+            Instrument:
+          </label>
           <select
             id="instrument"
-            class={`block w-full rounded-lg border-0 px-4 py-2.5 sm:w-40 ${themeColors.text} bg-white/80 shadow-sm ring-1 ring-gray-300 backdrop-blur-sm ring-inset focus:ring-2 focus:ring-blue-600 sm:text-sm sm:leading-6`}
+            class="block w-full rounded-xl border-0 bg-white px-4 py-2.5 text-gray-800 shadow focus:ring-2 focus:ring-indigo-500 sm:w-40 sm:text-sm"
             onchange={(e) =>
               (selectedInstrument = (e.target as HTMLSelectElement).value as
                 | "ukulele"
@@ -213,11 +239,12 @@
           <label
             for="orientation"
             class={`mb-1 block text-sm font-medium ${themeColors.heading}`}
-            >Direction:</label
           >
+            Direction:
+          </label>
           <select
             id="orientation"
-            class={`block w-full rounded-lg border-0 px-4 py-2.5 sm:w-40 ${themeColors.text} bg-white/80 shadow-sm ring-1 ring-gray-300 backdrop-blur-sm ring-inset focus:ring-2 focus:ring-blue-600 sm:text-sm sm:leading-6`}
+            class="block w-full rounded-xl border-0 bg-white px-4 py-2.5 text-gray-800 shadow focus:ring-2 focus:ring-indigo-500 sm:w-40 sm:text-sm"
             onchange={(e) =>
               (selectedOrientation = (e.target as HTMLSelectElement).value as
                 | "vertical"
@@ -236,44 +263,39 @@
       </div>
     </div>
     <!-- Display selected chord -->
-    <div class={`mb-6 text-center`}>
-      <div class={`text-2xl font-bold sm:text-3xl ${themeColors.text}`}>
+    <div class="mb-8 text-center">
+      <div class={`text-3xl font-bold sm:text-4xl ${themeColors.text}`}>
         {chordName}
       </div>
-      <div class="mt-1 text-gray-600">
+      <div class="mt-1 text-lg text-gray-600">
         {selectedInstrument === "guitar" ? "Guitar" : "Ukulele"} Chord
       </div>
     </div>
     <!-- Show variations for the chosen chord -->
     {#if variations.length === 0}
       <div
-        class="rounded-xl bg-white/80 p-8 text-center shadow-lg backdrop-blur-sm"
+        class="rounded-2xl bg-white/90 p-10 text-center shadow-2xl backdrop-blur-lg"
       >
-        <p class="text-lg text-gray-600">
+        <p class="text-xl text-gray-600">
           No chord shapes found for {chordName}.
         </p>
       </div>
     {:else}
-      <div
-        class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-4"
-      >
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {#each variations as position, i}
-          <div class="flex flex-col gap-y-2">
+          <div class="flex flex-col gap-y-3">
             <div
-              class={`${themeColors.card} overflow-hidden rounded-xl shadow-lg ${themeColors.shadow} border ${themeColors.border} transform overflow-hidden transition-all duration-300 hover:shadow-xl`}
+              class={`${themeColors.card} overflow-hidden rounded-2xl ${themeColors.shadow} ${themeColors.border} transform transition-all duration-300 hover:scale-105 hover:shadow-2xl`}
               id={`chord-diagram-${i}`}
             >
               <div
-                class={`bg-gradient-to-r ${themeColors.accent} flex items-center justify-center px-4 py-2`}
+                class={`bg-gradient-to-r ${themeColors.accent} flex items-center justify-center px-6 py-3`}
               >
-                <h3
-                  class="text-center text-lg font-medium font-semibold text-white"
-                >
+                <h3 class="text-center text-lg font-semibold text-white">
                   {chordName}
                 </h3>
               </div>
-              <div class="flex items-center justify-center p-4">
-                <!-- Pass the position data with custom colors and orientation -->
+              <div class="flex items-center justify-center p-6">
                 <ChordDiagram
                   chord={position}
                   instrument={selectedInstrument}
@@ -290,9 +312,9 @@
                 />
               </div>
             </div>
-            <div class="flex justify-center pb-4">
+            <div class="flex justify-center">
               <button
-                class={`rounded-lg px-4 py-2 ${themeColors.button} flex transform cursor-pointer items-center justify-center shadow-sm transition-all duration-200 hover:scale-105`}
+                class={`rounded-xl px-6 py-3 ${themeColors.button} flex items-center justify-center shadow transition-transform duration-200 hover:scale-105`}
                 onclick={() =>
                   downloadChordAsPng(
                     // @ts-ignore

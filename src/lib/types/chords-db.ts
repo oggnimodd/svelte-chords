@@ -47,3 +47,39 @@ export type ChordName =
   | "B";
 
 export type Chords = Record<ChordName, Chord[]>;
+
+export interface UkuleleChordsDB {
+  main: Main;
+  tunings: Tunings;
+  keys: string[];
+  suffixes: string[];
+  chords: {
+    A: UkuleleChord[];
+    Ab: UkuleleChord[];
+    B: UkuleleChord[];
+    Bb: UkuleleChord[];
+    C: UkuleleChord[];
+    D: UkuleleChord[];
+    Db: UkuleleChord[];
+    E: UkuleleChord[];
+    Eb: UkuleleChord[];
+    F: UkuleleChord[];
+    G: UkuleleChord[];
+    Gb: UkuleleChord[];
+  };
+}
+
+export interface UkuleleChord {
+  key: string;
+  suffix: string;
+  positions: UkuleleChordPosition[];
+}
+
+export interface UkuleleChordPosition {
+  frets: number[];
+  fingers: number[];
+  baseFret: number;
+  barres: number[];
+  midi: number[];
+  capo?: boolean;
+}
