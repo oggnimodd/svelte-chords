@@ -404,7 +404,7 @@ This is a simple counter example that declares a reactive value `count` using th
 
 ```svelte
 <script lang="ts">
-  let count = $state(0)
+  let count = $state(0);
 </script>
 
 <button onclick={() => count++}>
@@ -424,7 +424,7 @@ export let count = $state(0);
 
 ```svelte
 <script lang="ts">
-  import { count } from './counter.svelte'
+  import { count } from "./counter.svelte";
 </script>
 
 <button onclick={() => count++}>
@@ -462,7 +462,7 @@ You canâ€™t reassign imports, but you can update objects so updating `count.valu
 
 ```svelte
 <script lang="ts">
-  import { count } from './counter.svelte'
+  import { count } from "./counter.svelte";
 </script>
 
 <button onclick={() => count.value++}>
@@ -507,7 +507,7 @@ This comes at the cost of developer experience since you have to write more verb
 
 ```svelte
 <script lang="ts">
-  import { getCount, setCount } from './counter.svelte'
+  import { getCount, setCount } from "./counter.svelte";
 </script>
 
 <button onclick={() => setCount(getCount() + 1)}>
@@ -563,7 +563,7 @@ Using property accessors you can read and write to `count` using `counter.count`
 
 ```svelte
 <script lang="ts">
-  import { counter } from './counter.svelte'
+  import { counter } from "./counter.svelte";
 </script>
 
 <button onclick={() => counter.count++}>
@@ -601,9 +601,9 @@ Then you would initialize the counter inside the component:
 
 ```svelte
 <script lang="ts">
-  import { createCounter } from './counter.svelte'
+  import { createCounter } from "./counter.svelte";
 
-  const counter = createCounter()
+  const counter = createCounter();
 </script>
 
 <button onclick={counter.increment}>
@@ -619,7 +619,7 @@ You might want to destructure `count` and `increment` from `counter` but as youâ
 
 ```svelte
 <script lang="ts">
-  import { createCounter } from './counter.svelte'; // Import createCounter
+  import { createCounter } from "./counter.svelte"; // Import createCounter
 
   const { count, increment } = createCounter(); // Call createCounter
 </script>
@@ -664,10 +664,10 @@ Which method you prefer is up to you:
 
 ```svelte
 <script lang="ts">
-  import { createCounterProxy, createCounterFunction } from './counter.svelte'
+  import { createCounterProxy, createCounterFunction } from "./counter.svelte";
 
-  const { count: countProxy } = createCounterProxy()  //Renamed for clarity
-  const { count: countFunction, setCount, increment } = createCounterFunction()
+  const { count: countProxy } = createCounterProxy(); //Renamed for clarity
+  const { count: countFunction, setCount, increment } = createCounterFunction();
 </script>
 
 <button onclick={() => countProxy.value++}>
@@ -701,9 +701,9 @@ You can tuck the class inside a function if you want to hide the `new` keyword, 
 
 ```svelte
 <script lang="ts">
-  import { Counter } from './counter.svelte'
+  import { Counter } from "./counter.svelte";
 
-  const counter = new Counter()
+  const counter = new Counter();
 </script>
 
 <button onclick={counter.increment}>
