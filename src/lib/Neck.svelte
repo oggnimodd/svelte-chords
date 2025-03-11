@@ -11,9 +11,10 @@
     fretColor,
     orientation,
     skipFirstFretLine = false,
+    x = 0,
+    y = 0,
   }: NeckProps = $props();
 
-  // Derived dimensions
   let neckWidth = $derived.by(() =>
     orientation === "horizontal"
       ? fretCount * fretSpacing
@@ -26,7 +27,7 @@
   );
 </script>
 
-<g>
+<g transform={`translate(${x}, ${y})`}>
   {#if orientation === "horizontal"}
     <!-- Vertical fret lines -->
     {#each Array(fretCount + 1) as _, i}

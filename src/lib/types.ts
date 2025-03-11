@@ -20,6 +20,8 @@ export type NutProps = {
   color: string;
   parentWidth: number;
   orientation: Orientation;
+  x?: number;
+  y?: number;
 };
 
 export type DotProps = {
@@ -37,6 +39,8 @@ export type StringMarkerProps = {
   orientation: Orientation;
   stringSpacing: number;
   stringCount: number;
+  x?: number;
+  y?: number;
 };
 
 export type BarreProps = {
@@ -60,6 +64,8 @@ export type NeckProps = {
   fretColor: string;
   orientation: Orientation;
   skipFirstFretLine?: boolean;
+  x?: number;
+  y?: number;
 };
 
 export type ChordDiagramProps = {
