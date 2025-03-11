@@ -2,7 +2,6 @@
   import type { StringMarkerProps } from "./types.js";
   let {
     type,
-    stringIndex,
     orientation,
     stringSpacing,
     stringCount,
