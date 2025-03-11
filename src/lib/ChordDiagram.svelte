@@ -4,7 +4,6 @@
   import StringMarker from "./StringMarker.svelte";
   import type { ChordDiagramProps } from "./types.js";
 
-  // Svelte 5 style: $props(), $state, $derived
   let {
     chord,
     instrument = "guitar",
@@ -31,7 +30,6 @@
       ? coordWidth / fretCount
       : boxAspectRatio * (coordWidth / (stringCount - 1))
   );
-
   let stringSpacing = $derived(() =>
     orientation === "horizontal"
       ? fretSpacing() / boxAspectRatio
@@ -75,7 +73,6 @@
     if (minFret === Infinity) return 0;
     return minFret > 1 ? minFret - 1 : 0;
   }
-
   let offset = $state(computeOffset());
   let baseFret = $derived(() => offset + 1);
   let showNut = $derived(() => offset === 0);
@@ -92,7 +89,6 @@
     } else {
       rawFrets = chord.frets;
     }
-
     let result: { type: "x" | "o"; stringIndex: number }[] = [];
     for (let i = 0; i < stringCount; i++) {
       const fretVal = rawFrets[i];
@@ -107,23 +103,20 @@
 
   // We'll do a simple stacking layout, minimal transforms:
   let markerArea = $state(nutWidth); // space for markers
-
+  // For horizontal mode, we use nutWidth as the base indicator area as well
   // Compute totalWidth/Height so the diagram is fully visible in the viewBox
   let totalWidth = $derived(() => {
     if (orientation === "horizontal") {
-      return markerArea + (showNut() ? nutWidth : 0) + neckWidth();
+      return markerArea + nutWidth + neckWidth();
     } else {
-      return showNut() ? neckWidth() : nutWidth + neckWidth();
+      return neckWidth();
     }
   });
-
   let totalHeight = $derived(() => {
     if (orientation === "horizontal") {
-      return showNut() ? neckHeight() : nutWidth + neckHeight();
+      return nutWidth + neckHeight();
     } else {
-      // top for markers + nut if showNut => markerArea + nutWidth
-      // plus neck
-      return markerArea + (showNut() ? nutWidth : 0) + neckHeight();
+      return markerArea + nutWidth + neckHeight();
     }
   });
 </script>
@@ -135,58 +128,24 @@
   style="overflow: visible;"
 >
   {#if orientation === "horizontal"}
-    <!-- Horizontal orientation: top->bottom = strings 1..6 
-         rawFrets[0] => 6th string => bottom, rawFrets[5] => 1st => top. -->
-
-    {#if offset > 0}
-      <!-- Base fret indicator on top if chord doesn't start at fret 1 -->
-      <!-- KEY CHANGE: position near the first fret line, bigger font, and "fr" suffix -->
-      <g>
-        <text
-          x={markerArea + fretSpacing() / 2}
-          y={-fretSpacing() / 4}
-          font-size={10}
-          text-anchor="middle"
-          dominant-baseline="central"
-        >
-          {baseFret()}fr
-        </text>
-      </g>
-
-      <!-- Shift everything else down by nutWidth -->
-      <g transform={`translate(0, ${nutWidth})`}>
-        <!-- Markers on the left -->
+    <!-- Horizontal orientation -->
+    <g>
+      {#if offset > 0}
+        <!-- Show base fret indicator if chord doesn't start at fret 1, placed on top -->
         <g>
-          {#each markers() as marker}
-            <StringMarker
-              type={marker.type}
-              {orientation}
-              stringSpacing={stringSpacing()}
-              {stringCount}
-              stringIndex={marker.stringIndex}
-            />
-          {/each}
+          <text
+            x={markerArea + nutWidth + fretSpacing() / 2}
+            y={-fretSpacing() / 2}
+            font-size="10"
+            text-anchor="middle"
+            dominant-baseline="central"
+          >
+            {baseFret()}fr
+          </text>
         </g>
-        <!-- No nut in offset>0 scenario, so just the neck -->
-        <g transform={`translate(${markerArea}, 0)`}>
-          <Neck
-            {stringCount}
-            {fretCount}
-            stringSpacing={stringSpacing()}
-            fretSpacing={fretSpacing()}
-            {stringWidth}
-            {fretWidth}
-            {stringColor}
-            {fretColor}
-            {orientation}
-            skipFirstFretLine={false}
-          />
-        </g>
-      </g>
-    {:else}
-      <!-- offset == 0 => showNut = true -->
-      <!-- Markers on the left, no vertical shift -->
-      <g>
+      {/if}
+      <!-- Render markers on the left side -->
+      <g transform={`translate(${-markerArea / 2}, 0)`}>
         {#each markers() as marker}
           <StringMarker
             type={marker.type}
@@ -197,17 +156,20 @@
           />
         {/each}
       </g>
-      <!-- Nut on the left, then neck -->
-      <g transform={`translate(${markerArea}, 0)`}>
-        <Nut
-          width={nutWidth}
-          height={neckHeight()}
-          color={nutColor}
-          parentWidth={nutWidth}
-          {orientation}
-        />
-      </g>
-      <g transform={`translate(${markerArea + nutWidth}, 0)`}>
+      {#if offset === 0}
+        <!-- Only render nut if chord starts at fret 1 -->
+        <g transform={`translate(${markerArea}, ${nutWidth})`}>
+          <Nut
+            width={nutWidth}
+            height={neckHeight()}
+            color={nutColor}
+            parentWidth={neckHeight()}
+            {orientation}
+          />
+        </g>
+      {/if}
+      <!-- Always render the neck -->
+      <g transform={`translate(${markerArea + nutWidth}, ${nutWidth})`}>
         <Neck
           {stringCount}
           {fretCount}
@@ -221,71 +183,37 @@
           skipFirstFretLine={false}
         />
       </g>
-    {/if}
+    </g>
   {:else}
-    <!-- Vertical orientation: left->right = strings 6..1
-         rawFrets[0] => 6th => left, rawFrets[5] => 1st => right. -->
-
+    <!-- Vertical orientation -->
     {#if offset > 0}
-      <!-- Base fret indicator on the left if chord doesn't start at fret 1 -->
-      <!-- KEY CHANGE: align with the first fret line, bigger font, and "fr" suffix -->
+      <!-- Show base fret indicator if chord doesn't start at fret 1 -->
       <g>
         <text
-          x={-fretSpacing() / 4}
-          y={markerArea + fretSpacing() / 2}
-          font-size={10}
+          x={-fretSpacing() / 2}
+          y={nutWidth + markerArea + fretSpacing() / 2}
+          font-size="10"
           text-anchor="middle"
           dominant-baseline="central"
         >
           {baseFret()}fr
         </text>
       </g>
-      <!-- Shift everything else right by nutWidth -->
-      <g transform={`translate(${nutWidth}, 0)`}>
-        <!-- Markers on top -->
-        <g>
-          {#each markers() as marker}
-            <StringMarker
-              type={marker.type}
-              {orientation}
-              stringSpacing={stringSpacing()}
-              {stringCount}
-              stringIndex={marker.stringIndex}
-            />
-          {/each}
-        </g>
-        <!-- Then shift down by markerArea for the neck -->
-        <g transform={`translate(0, ${markerArea})`}>
-          <!-- offset>0 => no nut, just neck -->
-          <Neck
-            {stringCount}
-            {fretCount}
-            stringSpacing={stringSpacing()}
-            fretSpacing={fretSpacing()}
-            {stringWidth}
-            {fretWidth}
-            {stringColor}
-            {fretColor}
-            {orientation}
-            skipFirstFretLine={false}
-          />
-        </g>
-      </g>
-    {:else}
-      <!-- offset == 0 => showNut = true, no base fret indicator on the left -->
-      <!-- Markers on top -->
-      <g>
-        {#each markers() as marker}
-          <StringMarker
-            type={marker.type}
-            {orientation}
-            stringSpacing={stringSpacing()}
-            {stringCount}
-            stringIndex={marker.stringIndex}
-          />
-        {/each}
-      </g>
-      <!-- Then shift down by markerArea for the nut -->
+    {/if}
+    <!-- Always show markers on top -->
+    <g transform={`translate(0, ${-markerArea / 2})`}>
+      {#each markers() as marker}
+        <StringMarker
+          type={marker.type}
+          {orientation}
+          stringSpacing={stringSpacing()}
+          {stringCount}
+          stringIndex={marker.stringIndex}
+        />
+      {/each}
+    </g>
+    {#if offset === 0}
+      <!-- Only render nut if chord starts at fret 1 -->
       <g transform={`translate(0, ${markerArea})`}>
         <Nut
           width={neckWidth()}
@@ -295,21 +223,21 @@
           {orientation}
         />
       </g>
-      <!-- Then the neck below the nut -->
-      <g transform={`translate(0, ${markerArea + nutWidth})`}>
-        <Neck
-          {stringCount}
-          {fretCount}
-          stringSpacing={stringSpacing()}
-          fretSpacing={fretSpacing()}
-          {stringWidth}
-          {fretWidth}
-          {stringColor}
-          {fretColor}
-          {orientation}
-          skipFirstFretLine={false}
-        />
-      </g>
     {/if}
+    <!-- Always render the neck -->
+    <g transform={`translate(0, ${markerArea + nutWidth})`}>
+      <Neck
+        {stringCount}
+        {fretCount}
+        stringSpacing={stringSpacing()}
+        fretSpacing={fretSpacing()}
+        {stringWidth}
+        {fretWidth}
+        {stringColor}
+        {fretColor}
+        {orientation}
+        skipFirstFretLine={false}
+      />
+    </g>
   {/if}
 </svg>
