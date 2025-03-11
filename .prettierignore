@@ -2,3 +2,7 @@
 package-lock.json
 pnpm-lock.yaml
 yarn.lock
+
+
+# Generated Chords DB
+src/lib/chords-db
