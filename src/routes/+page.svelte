@@ -4,24 +4,25 @@
   // C major
   const chordsGuitar: ChordDefinition[] = [
     {
-      frets: "x32010",
-      fingers: "032010",
+      frets: "300033",
+      fingers: "100023",
     },
     {
-      frets: "x35553",
-      fingers: "012341",
-      barres: 3,
+      frets: "555785",
+      fingers: "111341",
+      barres: 5,
       capo: true,
     },
     {
-      frets: "xx5558",
-      fingers: "001114",
-      barres: 5,
+      frets: "xa778a",
+      fingers: "031124",
+      barres: 7,
+      capo: true,
     },
     {
-      frets: "8aa988",
-      fingers: "134211",
-      barres: 8,
+      frets: "aaccaa",
+      fingers: "113411",
+      barres: 10,
       capo: true,
     },
   ];

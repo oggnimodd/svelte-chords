@@ -16,7 +16,8 @@
     "test:e2e": "playwright test",
     "pre-commit": "lint-staged",
     "aider:commit": "aider --commit --model gemini/gemini-2.0-flash-exp",
-    "aider:gemini": "aider --model gemini/gemini-2.0-flash-exp"
+    "aider:gemini": "aider --model gemini/gemini-2.0-flash-exp",
+    "generate-chords": "bun run scripts/generate-chords.ts"
   },
   "files": [
     "dist",
@@ -49,6 +50,8 @@
     "@tailwindcss/vite": "^4.0.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/svelte": "^5.2.4",
+    "@types/bun": "^1.2.5",
+    "@types/node": "^22.13.10",
     "husky": "^9.1.7",
     "jsdom": "^26.0.0",
     "lint-staged": "^15.4.3",
