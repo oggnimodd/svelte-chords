@@ -9,8 +9,7 @@
   import guitarChordsData from "$lib/chords-db/guitar.json";
   // @ts-ignore
   import ukuleleChordsData from "$lib/chords-db/ukulele.json";
-  import ChordDiagram from "$lib/components/svelte-chords/ChordDiagram.svelte";
-  import { toPng } from "html-to-image";
+  import ChordCard from "$lib/components/website/ChordCard.svelte";
 
   // Load chord data (cast to proper types)
   let guitarChords = guitarChordsData as ChordsDB;
@@ -81,7 +80,7 @@
   );
 
   // Get theme colors based on instrument.
-  let themeColors = $derived.by(() => {
+  let theme = $derived.by(() => {
     return selectedInstrument === "guitar"
       ? {
           bg: "bg-gradient-to-br from-blue-100 to-indigo-100",
@@ -118,40 +117,9 @@
           capoColor: "#10B98180",
         };
   });
-
-  // Download the chord diagram as a PNG.
-  const downloadChordAsPng = (element: HTMLElement) => {
-    toPng(element)
-      .then((dataUrl: string) => {
-        const img = new Image();
-        img.onload = () => {
-          const canvas = document.createElement("canvas");
-          const ctx = canvas.getContext("2d");
-          if (!ctx) return;
-          canvas.width = img.width;
-          canvas.height = img.height;
-          ctx.beginPath();
-          const radius = 12;
-          ctx.roundRect(0, 0, canvas.width, canvas.height, radius);
-          ctx.clip();
-          ctx.drawImage(img, 0, 0);
-          const roundedDataUrl = canvas.toDataURL("image/png");
-          const link = document.createElement("a");
-          link.download = `${chordName}-chord.png`;
-          link.href = roundedDataUrl;
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        };
-        img.src = dataUrl;
-      })
-      .catch((error: Error) => {
-        console.error("Error generating chord image:", error);
-      });
-  };
 </script>
 
-<div class={`min-h-screen ${themeColors.bg} px-4 py-12 sm:px-6 lg:px-8`}>
+<div class={`min-h-screen ${theme.bg} px-4 py-12 sm:px-6 lg:px-8`}>
   <div class="container mx-auto max-w-5xl">
     <!-- Header -->
     <div class="mb-12 text-center">
@@ -168,7 +136,7 @@
     </div>
     <!-- Controls -->
     <div
-      class={`mb-10 rounded-2xl ${themeColors.card} ${themeColors.border} p-8 shadow-2xl backdrop-blur-lg`}
+      class={`mb-10 rounded-2xl ${theme.card} ${theme.border} p-8 shadow-2xl backdrop-blur-lg`}
     >
       <div
         class="flex flex-col items-center justify-center gap-6 sm:flex-row sm:flex-wrap"
@@ -176,7 +144,7 @@
         <div class="w-full sm:w-auto">
           <label
             for="key"
-            class={`mb-1 block text-sm font-medium ${themeColors.heading}`}
+            class={`mb-1 block text-sm font-medium ${theme.heading}`}
           >
             Key:
           </label>
@@ -196,7 +164,7 @@
         <div class="w-full sm:w-auto">
           <label
             for="suffix"
-            class={`mb-1 block text-sm font-medium ${themeColors.heading}`}
+            class={`mb-1 block text-sm font-medium ${theme.heading}`}
           >
             Suffix:
           </label>
@@ -219,7 +187,7 @@
         <div class="w-full sm:w-auto">
           <label
             for="instrument"
-            class={`mb-1 block text-sm font-medium ${themeColors.heading}`}
+            class={`mb-1 block text-sm font-medium ${theme.heading}`}
           >
             Instrument:
           </label>
@@ -242,7 +210,7 @@
         <div class="w-full sm:w-auto">
           <label
             for="orientation"
-            class={`mb-1 block text-sm font-medium ${themeColors.heading}`}
+            class={`mb-1 block text-sm font-medium ${theme.heading}`}
           >
             Direction:
           </label>
@@ -268,14 +236,14 @@
     </div>
     <!-- Display selected chord -->
     <div class="mb-8 text-center">
-      <div class={`text-3xl font-bold sm:text-4xl ${themeColors.text}`}>
+      <div class={`text-3xl font-bold sm:text-4xl ${theme.text}`}>
         {chordName}
       </div>
       <div class="mt-1 text-lg text-gray-600">
         {selectedInstrument === "guitar" ? "Guitar" : "Ukulele"} Chord
       </div>
     </div>
-    <!-- Show variations for the chosen chord -->
+    <!-- Show variations for the chosen chord using ChordCard component -->
     {#if variations.length === 0}
       <div
         class="rounded-2xl bg-white/90 p-10 text-center shadow-2xl backdrop-blur-lg"
@@ -287,61 +255,13 @@
     {:else}
       <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
         {#each variations as position, i}
-          <div class="flex flex-col gap-y-3">
-            <div
-              class={`${themeColors.card} overflow-hidden rounded-2xl ${themeColors.shadow} ${themeColors.border} transform transition-all duration-300 hover:scale-105 hover:shadow-2xl`}
-              id={`chord-diagram-${i}`}
-            >
-              <div
-                class={`bg-gradient-to-r ${themeColors.accent} flex items-center justify-center px-6 py-3`}
-              >
-                <h3 class="text-center text-lg font-semibold text-white">
-                  {chordName}
-                </h3>
-              </div>
-              <div class="flex items-center justify-center p-6">
-                <ChordDiagram
-                  chord={position}
-                  instrument={selectedInstrument}
-                  orientation={selectedOrientation}
-                  dotRadius={themeColors.dotRadius}
-                  nutWidth={4}
-                  stringColor={themeColors.string}
-                  fretColor={themeColors.fret}
-                  dotColor={themeColors.dot}
-                  nutColor={themeColors.nut}
-                  markerColor={themeColors.marker}
-                  capoColor={themeColors.capoColor}
-                  fretWidth={0.8}
-                  stringWidth={0.8}
-                />
-              </div>
-            </div>
-            <div class="flex justify-center">
-              <button
-                class={`rounded-xl px-6 py-3 ${themeColors.button} flex items-center justify-center shadow transition-transform duration-200 hover:scale-105`}
-                onclick={() =>
-                  downloadChordAsPng(
-                    // @ts-ignore
-                    document.getElementById(`chord-diagram-${i}`)
-                  )}
-              >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  class="mr-2 h-5 w-5"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
-                  <path
-                    fill-rule="evenodd"
-                    d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z"
-                    clip-rule="evenodd"
-                  />
-                </svg>
-                PNG
-              </button>
-            </div>
-          </div>
+          <ChordCard
+            chord={position}
+            instrument={selectedInstrument}
+            orientation={selectedOrientation}
+            {theme}
+            title={chordName}
+          />
         {/each}
       </div>
     {/if}
