@@ -9,7 +9,7 @@
   import guitarChordsData from "$lib/chords-db/guitar.json";
   // @ts-ignore
   import ukuleleChordsData from "$lib/chords-db/ukulele.json";
-  import ChordCard from "$lib/components/website/ChordCard.svelte";
+  import ChordCard from "../docs/components/ChordCard.svelte";
 
   // Load chord data (cast to proper types)
   let guitarChords = guitarChordsData as ChordsDB;

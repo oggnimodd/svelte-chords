@@ -1,10 +1,10 @@
 <script lang="ts">
-  import type { ChordDiagramProps } from "../svelte-chords/types.js";
-  import ChordDiagram from "$lib/components/svelte-chords/ChordDiagram.svelte";
+  import type { ChordDiagramProps } from "$lib/svelte-chords/types.js";
+  import ChordDiagram from "$lib/svelte-chords/ChordDiagram.svelte";
   import { toPng } from "html-to-image";
   import * as Tone from "tone";
-  import { store } from "./store.svelte";
-  import { createAccousticGuitarSampler } from "$lib/utils/sampler.js";
+  import { sampleStore } from "../stores/sampler.svelte.js";
+  import { createAccousticGuitarSampler } from "../utils/sampler.js";
 
   interface ChordCardTheme {
     bg: string;
@@ -70,8 +70,8 @@
   const playChord = () => {
     if (!chord.midi) return;
 
-    if (!store.sampler) {
-      store.sampler = createAccousticGuitarSampler();
+    if (!sampleStore.sampler) {
+      sampleStore.sampler = createAccousticGuitarSampler();
     }
     // Convert MIDI note numbers to note names (e.g., 60 -> "C4")
     const noteNames = chord.midi.map((midi: number) =>
@@ -84,7 +84,11 @@
 
     // A downward strum, play the notes in order
     noteNames.forEach((note, index) => {
-      store.sampler?.triggerAttackRelease(note, "2n", now + index * strumDelay);
+      sampleStore.sampler?.triggerAttackRelease(
+        note,
+        "2n",
+        now + index * strumDelay
+      );
     });
   };
 </script>

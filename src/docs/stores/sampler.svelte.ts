@@ -1,9 +1,9 @@
 import type { Sampler } from "tone";
 
-interface Store {
+interface SamplerStore {
   sampler: Sampler | null;
 }
 
-export const store: Store = $state({
+export const sampleStore: SamplerStore = $state({
   sampler: null,
 });
