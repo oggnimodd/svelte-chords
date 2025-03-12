@@ -4,6 +4,7 @@
   import StringMarker from "./StringMarker.svelte";
   import Dot from "./Dot.svelte";
   import Barre from "./Barre.svelte";
+  import Capo from "./Capo.svelte";
   import type { ChordDiagramProps, Orientation } from "./types.js";
 
   let {
@@ -23,6 +24,7 @@
     barreColor,
     barreThickness,
     ref = $bindable(),
+    capoColor,
   }: ChordDiagramProps = $props();
 
   const stringCount = $derived(instrument === "guitar" ? 6 : 4);
@@ -193,6 +195,63 @@
     return barresArr;
   };
   let barres = $derived.by(() => computeBarres());
+
+  const actualCapoColor = $derived(capoColor ?? actualBarreColor);
+
+  const capo = $derived.by(() => {
+    if (!chord.capo) return null;
+
+    let capoFret = 0;
+    if (chord.barres && chord.barres.length > 0) {
+      capoFret = Math.min(...chord.barres);
+    }
+    if (capoFret <= 0) return null;
+
+    const thickness = actualBarreThickness;
+    const color = actualCapoColor;
+
+    if (orientation === "vertical") {
+      const fretPos =
+        markerHeightVertical +
+        nutHeightVertical +
+        (capoFret - 0.5) * fretSpacingVertical;
+      const start = baseIndicatorSize;
+      // Add dotRadius to the computed end to extend the capo length
+      const end =
+        baseIndicatorSize +
+        (stringCount - 1) * stringSpacingVertical +
+        dotRadius;
+
+      return {
+        x: start,
+        y: fretPos - thickness / 2,
+        width: end - start,
+        height: thickness,
+        color,
+        orientation: "vertical" as Orientation,
+      };
+    } else {
+      const fretPos =
+        baseIndicatorSize +
+        nutWidthHorizontal +
+        (capoFret - 0.5) * fretSpacingHorizontal;
+      const start = baseIndicatorHeightHorizontal;
+      // Extend the capo length by adding dotRadius
+      const end =
+        baseIndicatorHeightHorizontal +
+        (stringCount - 1) * stringSpacingHorizontal +
+        dotRadius;
+
+      return {
+        x: fretPos - thickness / 2,
+        y: start,
+        width: thickness,
+        height: end - start,
+        color,
+        orientation: "horizontal" as Orientation,
+      };
+    }
+  });
 </script>
 
 <svg
@@ -238,6 +297,17 @@
         orientation="vertical"
         x={baseIndicatorSize}
         y={markerHeightVertical}
+      />
+    {/if}
+
+    {#if capo}
+      <Capo
+        x={capo.x}
+        y={capo.y}
+        width={capo.width}
+        height={capo.height}
+        color={capo.color}
+        orientation={capo.orientation}
       />
     {/if}
 
@@ -317,6 +387,17 @@
         orientation="horizontal"
         x={baseIndicatorSize}
         y={baseIndicatorHeightHorizontal}
+      />
+    {/if}
+
+    {#if capo}
+      <Capo
+        x={capo.x}
+        y={capo.y}
+        width={capo.width}
+        height={capo.height}
+        color={capo.color}
+        orientation={capo.orientation}
       />
     {/if}
 

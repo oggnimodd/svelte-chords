@@ -98,6 +98,7 @@
           heading: "text-blue-700",
           button: "bg-blue-600 hover:bg-blue-700 text-white",
           dotRadius: 6,
+          capoColor: "#6366F180",
         }
       : {
           bg: "bg-gradient-to-br from-emerald-100 to-teal-100",
@@ -114,6 +115,7 @@
           heading: "text-emerald-700",
           button: "bg-emerald-600 hover:bg-emerald-700 text-white",
           dotRadius: 7.5,
+          capoColor: "#10B98180",
         };
   });
 
@@ -309,6 +311,7 @@
                   dotColor={themeColors.dot}
                   nutColor={themeColors.nut}
                   markerColor={themeColors.marker}
+                  capoColor={themeColors.capoColor}
                   fretWidth={0.8}
                   stringWidth={0.8}
                 />

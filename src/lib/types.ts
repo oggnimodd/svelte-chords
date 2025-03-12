@@ -90,4 +90,5 @@ export type ChordDiagramProps = {
   markerColor?: string;
   boxAspectRatio?: number;
   ref?: HTMLOrSVGElement;
+  capoColor?: string;
 };
