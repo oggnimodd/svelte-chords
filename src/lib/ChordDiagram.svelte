@@ -3,7 +3,8 @@
   import Neck from "./Neck.svelte";
   import StringMarker from "./StringMarker.svelte";
   import Dot from "./Dot.svelte";
-  import type { ChordDiagramProps } from "./types.js";
+  import Barre from "./Barre.svelte";
+  import type { ChordDiagramProps, Orientation } from "./types.js";
 
   let {
     chord,
@@ -19,6 +20,8 @@
     dotRadius = 10,
     dotColor = "black",
     showFingerNumber = true,
+    barreColor,
+    barreThickness,
     ref = $bindable(),
   }: ChordDiagramProps = $props();
 
@@ -26,7 +29,6 @@
   const fretCount = $derived(instrument === "guitar" ? 5 : 4);
 
   let V = $state(100);
-
   let baseFretIndicatorSize = $derived.by(() => V * 0.22);
   let markerSpacingSize = $derived.by(() => V * 0.1);
 
@@ -46,6 +48,7 @@
   let markerHeightVertical = $derived.by(() =>
     orientation === "vertical" ? markerSpacingSize : 0
   );
+
   let nutHeightVertical = nutWidth;
   let totalHeightVertical = $derived.by(
     () =>
@@ -56,6 +59,7 @@
   let baseIndicatorHeightHorizontal = $derived.by(() =>
     orientation === "horizontal" ? baseFretIndicatorSize : 0
   );
+
   let nutWidthHorizontal = nutWidth;
   let neckWidthHorizontal = $derived.by(
     () => V - baseIndicatorHeightHorizontal - nutWidthHorizontal
@@ -83,11 +87,6 @@
   const parseFingers = () =>
     typeof chord.fingers === "string" ? chord.fingers.split("") : chord.fingers;
 
-  // Use chord.baseFret to determine the starting fret.
-  // Since chord.frets are now relative, we always use offset 0.
-  const offset = 0;
-  const baseFret = chord.baseFret; // from the chord definition
-
   let fretsVertical = $derived.by(() => parseFrets());
   let fretsHorizontal = $derived.by(() => parseFrets().slice().reverse());
   let fingersVertical = $derived.by(() => parseFingers());
@@ -97,20 +96,103 @@
   const getMarkers = (reverse: boolean) => {
     const raw = parseFrets();
     const markers: { type: "x" | "o"; stringIndex: number }[] = [];
+
     for (let i = 0; i < stringCount; i++) {
       const index = reverse ? stringCount - 1 - i : i;
       const val = raw[index];
+
       if (val === 0) {
         markers.push({ type: "o", stringIndex: i });
       } else if (val === -1) {
         markers.push({ type: "x", stringIndex: i });
       }
     }
+
     return markers;
   };
 
   let markersVertical = $derived.by(() => getMarkers(false));
   let markersHorizontal = $derived.by(() => getMarkers(true));
+
+  // If user doesn’t pass a barreColor, use the dotColor.
+  const actualBarreColor = $derived(barreColor ?? dotColor);
+  // If user doesn’t pass a barreThickness, use dotRadius * 2.
+  const actualBarreThickness = $derived(barreThickness ?? dotRadius * 2);
+
+  const computeBarres = () => {
+    if (!chord.barres || chord.barres.length === 0) return [];
+
+    // Reverse the frets if horizontal, same as how you do for dots.
+    const orientedFrets =
+      orientation === "horizontal"
+        ? parseFrets().slice().reverse()
+        : parseFrets();
+
+    const barresArr: {
+      start: number;
+      end: number;
+      fret: number;
+      thickness: number;
+      color: string;
+      orientation: Orientation;
+    }[] = [];
+
+    for (const barreFret of chord.barres) {
+      // Collect the strings that have this barreFret
+      const stringIndices = orientedFrets
+        .map((f, i) => (f === barreFret ? i : -1))
+        .filter((i) => i !== -1);
+
+      // Only do a barre if at least 2 strings share the same fret
+      if (stringIndices.length >= 2) {
+        const min = Math.min(...stringIndices);
+        const max = Math.max(...stringIndices);
+
+        if (orientation === "vertical") {
+          // For vertical, strings go left->right, so the line is horizontal
+          const fretPos =
+            markerHeightVertical +
+            nutHeightVertical +
+            (barreFret - 0.5) * fretSpacingVertical;
+
+          const start = baseIndicatorSize + min * stringSpacingVertical;
+          const end = baseIndicatorSize + max * stringSpacingVertical;
+
+          barresArr.push({
+            start,
+            end,
+            fret: fretPos,
+            thickness: actualBarreThickness,
+            color: actualBarreColor,
+            orientation: "horizontal",
+          });
+        } else {
+          // For horizontal, strings go top->bottom, so the line is vertical
+          const fretPos =
+            baseIndicatorSize +
+            nutWidthHorizontal +
+            (barreFret - 0.5) * fretSpacingHorizontal;
+
+          const start =
+            baseIndicatorHeightHorizontal + min * stringSpacingHorizontal;
+          const end =
+            baseIndicatorHeightHorizontal + max * stringSpacingHorizontal;
+
+          barresArr.push({
+            start,
+            end,
+            fret: fretPos,
+            thickness: actualBarreThickness,
+            color: actualBarreColor,
+            orientation: "vertical",
+          });
+        }
+      }
+    }
+
+    return barresArr;
+  };
+  let barres = $derived.by(() => computeBarres());
 </script>
 
 <svg
@@ -173,6 +255,17 @@
       orientation="vertical"
       skipFirstFretLine={false}
     />
+
+    {#each barres as barre}
+      <Barre
+        start={barre.start}
+        end={barre.end}
+        fret={barre.fret}
+        thickness={barre.thickness}
+        color={barre.color}
+        orientation={barre.orientation}
+      />
+    {/each}
 
     {#each fretsVertical as fret, i}
       {#if typeof fret === "number" && fret > 0}
@@ -241,6 +334,17 @@
       orientation="horizontal"
       skipFirstFretLine={false}
     />
+
+    {#each barres as barre}
+      <Barre
+        start={barre.start}
+        end={barre.end}
+        fret={barre.fret}
+        thickness={barre.thickness}
+        color={barre.color}
+        orientation={barre.orientation}
+      />
+    {/each}
 
     {#each fretsHorizontal as fret, i}
       {#if typeof fret === "number" && fret > 0}

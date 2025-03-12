@@ -97,6 +97,7 @@
           text: "text-blue-900",
           heading: "text-blue-700",
           button: "bg-blue-600 hover:bg-blue-700 text-white",
+          dotRadius: 6,
         }
       : {
           bg: "bg-gradient-to-br from-emerald-100 to-teal-100",
@@ -112,6 +113,7 @@
           text: "text-emerald-900",
           heading: "text-emerald-700",
           button: "bg-emerald-600 hover:bg-emerald-700 text-white",
+          dotRadius: 7.5,
         };
   });
 
@@ -300,7 +302,7 @@
                   chord={position}
                   instrument={selectedInstrument}
                   orientation={selectedOrientation}
-                  dotRadius={6.5}
+                  dotRadius={themeColors.dotRadius}
                   nutWidth={4}
                   stringColor={themeColors.string}
                   fretColor={themeColors.fret}
@@ -333,7 +335,7 @@
                     clip-rule="evenodd"
                   />
                 </svg>
-                Download PNG
+                PNG
               </button>
             </div>
           </div>
