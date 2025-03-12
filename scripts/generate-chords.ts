@@ -50,8 +50,8 @@ async function main() {
   console.log("Moving the generated library to the target folder...");
   // The generated library is assumed to be in the "lib" folder inside the repo.
   const generatedDir = path.join(repoDir, "lib");
-  // Target folder is now "../src/lib/chords-db" relative to process.cwd()
-  const targetDir = path.join(process.cwd(), "./src/lib/chords-db");
+  // Target folder is now "./src/chords-db" relative to process.cwd()
+  const targetDir = path.join(process.cwd(), "./src/chords-db");
 
   // Ensure the parent directory of the target folder exists.
   await fs.mkdir(path.dirname(targetDir), { recursive: true });

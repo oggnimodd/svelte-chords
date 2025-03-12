@@ -26,4 +26,4 @@ vite.config.ts.timestamp-*
 .aider*
 
 # Generated chords db
-src/lib/chords-db
+src/chords-db

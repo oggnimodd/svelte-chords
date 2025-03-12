@@ -5,10 +5,11 @@
     ChordName,
     UkuleleChordsDB,
   } from "../types/chords-db.js";
-  // @ts-ignore
-  import guitarChordsData from "$lib/chords-db/guitar.json";
-  // @ts-ignore
-  import ukuleleChordsData from "$lib/chords-db/ukulele.json";
+  // @ts-ignore - ignore TS errors for now
+  import guitarChordsData from "../chords-db/guitar.json";
+  // @ts-ignore - ignore TS errors for now
+
+  import ukuleleChordsData from "../chords-db/ukulele.json";
   import ChordCard from "../docs/components/ChordCard.svelte";
 
   // Load chord data (cast to proper types)

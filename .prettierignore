@@ -5,4 +5,4 @@ yarn.lock
 
 
 # Generated Chords DB
-src/lib/chords-db
+src/chords-db
