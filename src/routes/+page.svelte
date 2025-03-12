@@ -4,12 +4,12 @@
     Chord,
     ChordName,
     UkuleleChordsDB,
-  } from "$lib/types/chords-db.js";
+  } from "../types/chords-db.js";
   // @ts-ignore
   import guitarChordsData from "$lib/chords-db/guitar.json";
   // @ts-ignore
   import ukuleleChordsData from "$lib/chords-db/ukulele.json";
-  import ChordDiagram from "$lib/ChordDiagram.svelte";
+  import ChordDiagram from "$lib/components/svelte-chords/ChordDiagram.svelte";
   import { toPng } from "html-to-image";
 
   // Load chord data (cast to proper types)
